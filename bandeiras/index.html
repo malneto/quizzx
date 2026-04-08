@@ -620,7 +620,6 @@ function showQuestion() {
           ${allOptions.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)">${o.n}</button>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
@@ -634,7 +633,6 @@ function showQuestion() {
           ${allOptions.map(o => `<div class="option-flag" data-value="${o.c}" data-correct="${country.c}" onclick="selectFlag(this)"><img src="${flagUrlSmall(o.c)}" alt="bandeira"></div>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
@@ -649,7 +647,6 @@ function showQuestion() {
           ${currencyOptions.map(o => `<button class="option-btn" data-value="${o.m}" data-correct="${country.m}" onclick="selectText(this)">${o.m}</button>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
@@ -664,7 +661,6 @@ function showQuestion() {
           ${langOptions.map(o => `<button class="option-btn" data-value="${o.l}" data-correct="${country.l}" onclick="selectText(this)">${o.l}</button>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
@@ -678,7 +674,6 @@ function showQuestion() {
           ${allOptions.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)"><strong>${o.n}</strong><br><small>Capital: ${o.cap}</small></button>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
@@ -693,28 +688,13 @@ function showQuestion() {
           ${allOpts.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)"><strong>${o.n}</strong><br><small>Capital: ${o.cap} | Moeda: ${o.m} | Idioma: ${o.l}</small></button>`).join('')}
         </div>
         <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
         <div id="feedbackArea"></div>
       </div>`;
   }
 
   area.innerHTML = html;
   selectedAnswer = null;
-  inputsReady = false;
-
-  let countdown = 3;
-  const label = document.getElementById('timerLabel');
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      label.textContent = `Liberando em ${countdown}...`;
-    } else {
-      clearInterval(timerInterval);
-      label.textContent = '';
-      inputsReady = true;
-    }
-  }, 1000);
+  inputsReady = true;
 }
 
 function selectText(btn) {

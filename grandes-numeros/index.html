@@ -696,25 +696,11 @@ function showQuestion() {
       <div class="question-text">${q.q}</div>
       ${inputHTML}
       <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
-      <div class="timer-label" id="timerLabel">Liberando em 3...</div>
       <div id="feedbackArea"></div>
     </div>
   `;
 
-  inputsReady = false;
-  let countdown = 3;
-  const label = document.getElementById('timerLabel');
-  timerInterval = setInterval(() => {
-    countdown--;
-    if (countdown > 0) {
-      label.textContent = `Liberando em ${countdown}...`;
-    } else {
-      clearInterval(timerInterval);
-      label.textContent = '';
-      inputsReady = true;
-      enableInputs();
-    }
-  }, 1000);
+  inputsReady = true;
 }
 
 function enableInputs() {
