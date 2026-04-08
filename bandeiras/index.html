@@ -574,6 +574,7 @@ let selectedAnswer = null;
 let inputsReady = false;
 let timerInterval = null;
 let selectedContinent = '';
+let activePool = countries;
 
 function selectContinent(btn, cont) {
   selectedContinent = cont;
@@ -622,8 +623,8 @@ function startQuiz(m) {
   currentQ = 0;
   score = 0;
   userEmail = (document.getElementById('emailInput').value || '').trim();
-  const pool = selectedContinent ? countries.filter(c => c.cont === selectedContinent) : countries;
-  roundCountries = shuffle(pool).slice(0, Math.min(TOTAL_Q, pool.length));
+  activePool = selectedContinent ? countries.filter(c => c.cont === selectedContinent) : countries;
+  roundCountries = shuffle(activePool).slice(0, Math.min(TOTAL_Q, activePool.length));
   document.getElementById('modeScreen').classList.add('hidden');
   document.getElementById('quizScreen').classList.remove('hidden');
   document.getElementById('finalScreen').classList.add('hidden');
@@ -637,7 +638,7 @@ function showQuestion() {
   document.getElementById('progressFill').style.width = (currentQ / TOTAL_Q * 100) + '%';
 
   let html = '';
-  const distractors = pickRandom(countries, 3, country);
+  const distractors = pickRandom(activePool, 3, country);
   const allOptions = shuffle([country, ...distractors]);
 
   if (mode === 'flag2country') {
@@ -667,7 +668,7 @@ function showQuestion() {
       </div>`;
   }
   else if (mode === 'flag2currency') {
-    const currencyOptions = shuffle([country, ...pickRandom(countries.filter(x => x.m !== country.m), 3)]);
+    const currencyOptions = shuffle([country, ...pickRandom(activePool.filter(x => x.m !== country.m), 3)]);
     html = `
       <div class="question-card">
         <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
@@ -681,7 +682,7 @@ function showQuestion() {
       </div>`;
   }
   else if (mode === 'flag2language') {
-    const langOptions = shuffle([country, ...pickRandom(countries.filter(x => x.l !== country.l), 3)]);
+    const langOptions = shuffle([country, ...pickRandom(activePool.filter(x => x.l !== country.l), 3)]);
     html = `
       <div class="question-card">
         <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
@@ -708,7 +709,7 @@ function showQuestion() {
       </div>`;
   }
   else if (mode === 'flag2all') {
-    const allOpts = shuffle([country, ...pickRandom(countries.filter(x => x.n !== country.n), 3)]);
+    const allOpts = shuffle([country, ...pickRandom(activePool.filter(x => x.n !== country.n), 3)]);
     html = `
       <div class="question-card">
         <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
