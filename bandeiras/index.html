@@ -290,8 +290,11 @@
 </head>
 <body>
 <div class="container">
-  <a href="../index.html" class="back-link">&larr; QuizX</a>
-  <h1>BANDEIRAS DO MUNDO</h1>
+  <div id="headerArea">
+    <a href="../index.html" class="back-link">&larr; QuizX</a>
+    <h1>BANDEIRAS DO MUNDO</h1>
+    <p class="subtitle">200+ países &mdash; perguntas aleatórias por rodada</p>
+  </div>
 
   <!-- Mode Selection -->
   <div id="modeScreen">
@@ -630,6 +633,7 @@ function startQuiz(m) {
   userEmail = (document.getElementById('emailInput').value || '').trim();
   activePool = selectedContinent ? countries.filter(c => c.cont === selectedContinent) : countries;
   roundCountries = shuffle(activePool).slice(0, Math.min(TOTAL_Q, activePool.length));
+  document.getElementById('headerArea').classList.add('hidden');
   document.getElementById('modeScreen').classList.add('hidden');
   document.getElementById('quizScreen').classList.remove('hidden');
   document.getElementById('finalScreen').classList.add('hidden');
@@ -883,6 +887,7 @@ function sendResult(pct, modeName) {
 }
 
 function backToModes() {
+  document.getElementById('headerArea').classList.remove('hidden');
   document.getElementById('finalScreen').classList.add('hidden');
   document.getElementById('quizScreen').classList.add('hidden');
   document.getElementById('countryDetailScreen').classList.add('hidden');
