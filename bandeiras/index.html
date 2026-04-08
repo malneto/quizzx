@@ -737,7 +737,7 @@ function checkAnswer() {
   document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ + 1}`;
   document.getElementById('submitBtn').classList.add('hidden');
 
-  const mapQuery = encodeURIComponent(country.n);
+  const mapQuery = encodeURIComponent(britannicaUrl(country.n).split('/place/')[1].replace(/-/g,' ') + ' country');
   const libColor = country.lib >= 7 ? '#6bff6b' : country.lib >= 5 ? '#ffd93d' : '#ff6b6b';
   const libLabel = country.lib >= 8 ? 'Muito Livre' : country.lib >= 7 ? 'Livre' : country.lib >= 5 ? 'Moderado' : country.lib >= 3 ? 'Pouco Livre' : 'Reprimido';
   const libBar = Math.round(country.lib * 10);
@@ -891,7 +891,7 @@ function showCountryDetail(code) {
   const detail = document.getElementById('countryDetailScreen');
   detail.classList.remove('hidden');
 
-  const mapQuery = encodeURIComponent(country.n);
+  const mapQuery = encodeURIComponent(britannicaUrl(country.n).split('/place/')[1].replace(/-/g,' ') + ' country');
   const libColor = country.lib >= 7 ? '#6bff6b' : country.lib >= 5 ? '#ffd93d' : '#ff6b6b';
   const libLabel = country.lib >= 8 ? 'Muito Livre' : country.lib >= 7 ? 'Livre' : country.lib >= 5 ? 'Moderado' : country.lib >= 3 ? 'Pouco Livre' : 'Reprimido';
   const libBar = Math.round(country.lib * 10);
