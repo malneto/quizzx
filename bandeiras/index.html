@@ -820,10 +820,12 @@ function checkAnswer() {
   `;
 
   selectedAnswer = null;
+  window.scrollTo(0, 0);
 }
 
 function nextQuestion() {
   currentQ++;
+  window.scrollTo(0, 0);
   if (currentQ < TOTAL_Q) {
     showQuestion();
   } else {
