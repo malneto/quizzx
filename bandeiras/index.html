@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizX - Bandeiras do Mundo</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Space Mono', monospace;
+    background: #0a0a2e;
+    color: #e0e0ff;
+    min-height: 100vh;
+  }
+  .container {
+    max-width: 800px; margin: 0 auto; padding: 20px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    font-size: 1.8em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b, #6bb5ff, #d96bff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 4s ease infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .subtitle { text-align: center; color: #8888cc; font-size: 0.9em; margin-bottom: 25px; }
+  .back-link {
+    display: inline-block; color: #6bb5ff; text-decoration: none; font-size: 0.85em; margin-bottom: 15px;
+  }
+  .back-link:hover { color: #99ccff; }
+
+  /* Mode selector */
+  .modes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 25px; }
+  .mode-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 12px 20px;
+    border: 2px solid #4a4a8e;
+    border-radius: 12px;
+    background: transparent;
+    color: #c0c0ff;
+    font-size: 0.75em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .mode-btn:hover {
+    border-color: #ffd93d;
+    color: #ffd93d;
+    box-shadow: 0 0 15px rgba(255, 217, 61, 0.2);
+  }
+  .mode-btn .mode-icon { font-size: 1.8em; display: block; margin-bottom: 5px; }
+
+  .qty-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 10px 22px;
+    border: 2px solid #4a4a8e;
+    border-radius: 10px;
+    background: transparent;
+    color: #c0c0ff;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .qty-btn:hover { border-color: #ffd93d; color: #ffd93d; }
+  .qty-btn.selected { border-color: #6bff6b; color: #6bff6b; background: rgba(107,255,107,0.1); }
+
+  /* Progress & Score */
+  .progress-bar { width: 100%; height: 8px; background: #1a1a4e; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #6bff6b, #ffd93d, #ff6b6b); border-radius: 4px; transition: width 0.5s ease; }
+  .score-display { text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.95em; color: #ffd93d; margin-bottom: 12px; }
+
+  /* Question card */
+  .question-card {
+    background: linear-gradient(135deg, #1a1a4e, #2a1a5e);
+    border: 2px solid #3a3a8e;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
+  }
+  .question-number { font-family: 'Orbitron', sans-serif; font-size: 0.85em; color: #6bb5ff; margin-bottom: 8px; }
+  .question-text { font-size: 1.1em; line-height: 1.5; margin-bottom: 20px; color: #fff; text-align: center; }
+
+  .flag-display {
+    text-align: center; margin-bottom: 20px;
+  }
+  .flag-display img {
+    width: 200px; height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    border: 3px solid #3a3a8e;
+  }
+  .country-label {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.3em;
+    color: #ffd93d;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  /* Options */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .options.flags-grid { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+  .option-btn {
+    font-family: 'Space Mono', monospace;
+    padding: 14px 18px;
+    background: #0d0d3a;
+    border: 2px solid #4a4a8e;
+    border-radius: 12px;
+    color: #c0c0ff;
+    font-size: 0.95em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+  }
+  .option-btn:hover { border-color: #8888ff; background: #1a1a5e; transform: translateX(5px); }
+  .option-btn.selected { border-color: #ffd93d; background: #2a2a3e; }
+  .option-btn.correct { border-color: #6bff6b !important; background: rgba(107,255,107,0.15) !important; color: #6bff6b !important; }
+  .option-btn.wrong { border-color: #ff6b6b !important; background: rgba(255,107,107,0.15) !important; color: #ff6b6b !important; }
+
+  .option-flag {
+    width: 140px; height: 90px;
+    background: #0d0d3a;
+    border: 2px solid #4a4a8e;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 5px;
+  }
+  .option-flag img { width: 100%; height: auto; border-radius: 6px; }
+  .option-flag:hover { border-color: #8888ff; transform: scale(1.05); }
+  .option-flag.selected { border-color: #ffd93d; background: #2a2a3e; }
+  .option-flag.correct { border-color: #6bff6b !important; background: rgba(107,255,107,0.15) !important; }
+  .option-flag.wrong { border-color: #ff6b6b !important; background: rgba(255,107,107,0.15) !important; }
+
+  .submit-btn {
+    font-family: 'Orbitron', sans-serif;
+    display: block; width: 100%; margin-top: 15px; padding: 14px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae);
+    border: none; border-radius: 12px;
+    color: white; font-size: 1em; cursor: pointer;
+    transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+  }
+  .submit-btn:hover:not(:disabled) { background: linear-gradient(135deg, #6a6aae, #8a6ace); box-shadow: 0 0 20px rgba(150,100,255,0.4); }
+  .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .timer-label { text-align: center; color: #ff6b6b; font-size: 0.85em; margin-top: 8px; font-family: 'Orbitron', sans-serif; }
+
+  .feedback { margin-top: 18px; padding: 18px; border-radius: 15px; animation: fadeIn 0.5s ease; }
+  .feedback.correct { background: rgba(107,255,107,0.1); border: 2px solid #6bff6b; }
+  .feedback.wrong { background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; }
+  .feedback-icon { font-size: 1.5em; text-align: center; margin-bottom: 8px; }
+  .feedback-text { font-size: 0.9em; line-height: 1.6; color: #ccccff; }
+  .feedback-text strong { color: #ffd93d; }
+  .feedback-flag { text-align: center; margin-top: 10px; }
+  .feedback-flag img { width: 100px; border-radius: 6px; border: 2px solid #3a3a8e; }
+
+  .country-info {
+    margin-top: 12px;
+    background: rgba(10,10,46,0.5);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(100,100,200,0.15);
+    font-size: 0.85em;
+  }
+  .info-row:last-of-type { border-bottom: none; }
+  .info-label { color: #8888cc; }
+  .info-value { color: #e0e0ff; text-align: right; flex: 1; margin-left: 10px; }
+  .info-history {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(100,100,200,0.2);
+    font-size: 0.82em;
+    line-height: 1.6;
+    color: #aaaadd;
+    font-style: italic;
+  }
+
+  .feedback-map {
+    margin-top: 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 2px solid #3a3a8e;
+  }
+  .feedback-map iframe {
+    width: 100%;
+    height: 200px;
+    border: none;
+  }
+
+  .next-btn {
+    font-family: 'Orbitron', sans-serif;
+    display: block; width: 100%; margin-top: 12px; padding: 14px;
+    background: linear-gradient(135deg, #2a8a2a, #3aaa3a);
+    border: none; border-radius: 12px;
+    color: white; font-size: 0.95em; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+  }
+  .next-btn:hover { background: linear-gradient(135deg, #3aaa3a, #4aca4a); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .final-screen { text-align: center; padding: 40px 20px; }
+  .final-score { font-family: 'Orbitron', sans-serif; font-size: 3.5em; margin: 20px 0; }
+  .final-score.great { color: #6bff6b; }
+  .final-score.good { color: #ffd93d; }
+  .final-score.try-again { color: #ff6b6b; }
+  .final-msg { font-size: 1.1em; margin-bottom: 25px; line-height: 1.6; }
+  .restart-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 14px 40px; background: linear-gradient(135deg, #6b4aff, #9b6bff);
+    border: none; border-radius: 15px; color: white; font-size: 1em;
+    cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+    margin: 5px;
+  }
+  .restart-btn:hover { box-shadow: 0 0 30px rgba(150,100,255,0.5); transform: scale(1.05); }
+
+  .email-input {
+    font-family: 'Space Mono', monospace;
+    width: 100%; max-width: 350px;
+    padding: 10px 15px;
+    background: #0d0d3a;
+    border: 2px solid #4a4a8e;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 0.9em;
+    outline: none;
+    transition: border-color 0.3s;
+    text-align: center;
+  }
+  .email-input:focus { border-color: #ffd93d; }
+  .email-input::placeholder { color: #5555aa; }
+
+  .country-dropdown {
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: #1a1a4e;
+    border: 2px solid #4a4a8e;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .country-dropdown-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    font-size: 0.85em;
+    color: #c0c0ff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+  }
+  .country-dropdown-item:hover { background: #2a2a6e; }
+  .country-dropdown-item img { width: 30px; border-radius: 3px; }
+
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.3em; }
+    .mode-btn { padding: 10px 14px; font-size: 0.7em; }
+    .flag-display img { width: 150px; }
+    .option-flag { width: 110px; height: 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="../index.html" class="back-link">&larr; QuizX</a>
+  <h1>BANDEIRAS DO MUNDO</h1>
+  <p class="subtitle">200+ países &mdash; perguntas aleatórias por rodada</p>
+
+  <!-- Mode Selection -->
+  <div id="modeScreen">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">RECEBER RESULTADO POR E-MAIL (opcional)</div>
+      <input type="email" id="emailInput" class="email-input" placeholder="seu@email.com">
+    </div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">QUANTAS PERGUNTAS?</div>
+      <div class="modes" style="margin-bottom:0">
+        <button class="qty-btn selected" onclick="selectQty(this,10)">10</button>
+        <button class="qty-btn" onclick="selectQty(this,20)">20</button>
+        <button class="qty-btn" onclick="selectQty(this,30)">30</button>
+        <button class="qty-btn" onclick="selectQty(this,50)">50</button>
+      </div>
+    </div>
+    <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;text-align:center">ESCOLHA O MODO</div>
+    <div class="modes">
+      <button class="mode-btn" onclick="startQuiz('flag2country')">
+        <span class="mode-icon">&#127987;</span> Bandeira &rarr; País
+      </button>
+      <button class="mode-btn" onclick="startQuiz('country2flag')">
+        <span class="mode-icon">&#127758;</span> País &rarr; Bandeira
+      </button>
+      <button class="mode-btn" onclick="startQuiz('flag2capital')">
+        <span class="mode-icon">&#127963;</span> Bandeira &rarr; País e Capital
+      </button>
+      <button class="mode-btn" onclick="startQuiz('flag2currency')">
+        <span class="mode-icon">&#128176;</span> Bandeira &rarr; Moeda
+      </button>
+      <button class="mode-btn" onclick="startQuiz('flag2language')">
+        <span class="mode-icon">&#128172;</span> Bandeira &rarr; Idioma
+      </button>
+      <button class="mode-btn" onclick="startQuiz('flag2all')">
+        <span class="mode-icon">&#127942;</span> Bandeira &rarr; Tudo
+      </button>
+    </div>
+    <div style="text-align:center;margin-top:25px;padding-top:20px;border-top:1px solid #3a3a8e">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">OU CONSULTE UM PAÍS</div>
+      <div style="position:relative;display:inline-block;width:100%;max-width:350px">
+        <input type="text" id="countrySearch" class="email-input" placeholder="Digite o nome do país..." oninput="filterCountries()" onfocus="filterCountries()" autocomplete="off">
+        <div id="countryDropdown" class="country-dropdown hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Country Detail -->
+  <div id="countryDetailScreen" class="hidden">
+    <div id="countryDetailArea"></div>
+    <button class="restart-btn" onclick="backFromDetail()" style="margin-top:15px;display:block;width:100%">&larr; VOLTAR</button>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quizScreen" class="hidden">
+    <div class="score-display" id="scoreDisplay">Acertos: 0 / 0</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- Final -->
+  <div id="finalScreen" class="hidden"></div>
+</div>
+
+<script>
+const countries = [
+  {n:"Afeganistão",c:"af",m:"Afegani",l:"Pachto",cap:"Cabul",cont:"Ásia",pop:"42 mi",rpc:"US$ 380",lib:1,h:"Encruzilhada de impérios por milênios — de Alexandre Magno aos mongóis. Independente do Reino Unido em 1919, vive instabilidade desde a invasão soviética de 1979."},
+  {n:"África do Sul",c:"za",m:"Rand",l:"Zulu",cap:"Pretória",cont:"África",pop:"62 mi",rpc:"US$ 6.200",lib:6,h:"Colonizada por holandeses e britânicos. Viveu o apartheid de 1948 a 1994, quando Nelson Mandela se tornou o primeiro presidente negro eleito."},
+  {n:"Albânia",c:"al",m:"Lek",l:"Albanês",cap:"Tirana",cont:"Europa",pop:"2,8 mi",rpc:"US$ 7.300",lib:6.5,h:"Parte do Império Otomano por 500 anos. Independente em 1912, viveu uma ditadura comunista isolada de 1944 a 1991."},
+  {n:"Alemanha",c:"de",m:"Euro",l:"Alemão",cap:"Berlim",cont:"Europa",pop:"84 mi",rpc:"US$ 52.000",lib:7.5,h:"Unificada em 1871 por Bismarck. Dividida em Ocidental e Oriental após a 2ª Guerra, reunificada em 1990 com a queda do Muro de Berlim."},
+  {n:"Andorra",c:"ad",m:"Euro",l:"Catalão",cap:"Andorra-a-Velha",cont:"Europa",pop:"80 mil",rpc:"US$ 44.000",lib:7,h:"Microestado nos Pireneus, co-governado pelo presidente da França e pelo bispo de Urgell desde 1278."},
+  {n:"Angola",c:"ao",m:"Kwanza",l:"Português",cap:"Luanda",cont:"África",pop:"36 mi",rpc:"US$ 2.300",lib:4.5,h:"Colônia portuguesa por 500 anos. Independente em 1975, enfrentou guerra civil até 2002. Rica em petróleo e diamantes."},
+  {n:"Antígua e Barbuda",c:"ag",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Saint John's",cont:"América Central",pop:"100 mil",rpc:"US$ 19.000",lib:6.5,h:"Colonizada pela Inglaterra em 1632. Independente em 1981, economia baseada em turismo."},
+  {n:"Arábia Saudita",c:"sa",m:"Rial Saudita",l:"Árabe",cap:"Riade",cont:"Ásia",pop:"37 mi",rpc:"US$ 30.000",lib:5,h:"Unificada em 1932 por Ibn Saud. Guardiã das cidades sagradas de Meca e Medina, enriqueceu com petróleo a partir dos anos 1940."},
+  {n:"Argélia",c:"dz",m:"Dinar Argelino",l:"Árabe",cap:"Argel",cont:"África",pop:"46 mi",rpc:"US$ 4.000",lib:4.5,h:"Colonizada pela França em 1830. Conquistou independência em 1962 após guerra sangrenta de 8 anos."},
+  {n:"Argentina",c:"ar",m:"Peso Argentino",l:"Espanhol",cap:"Buenos Aires",cont:"América do Sul",pop:"46 mi",rpc:"US$ 13.500",lib:5,h:"Independente da Espanha em 1816. Foi um dos países mais ricos do mundo no início do século XX, recebeu milhões de imigrantes europeus."},
+  {n:"Armênia",c:"am",m:"Dram",l:"Armênio",cap:"Erevã",cont:"Ásia",pop:"3 mi",rpc:"US$ 7.600",lib:6.5,h:"Uma das civilizações mais antigas do mundo, primeiro país a adotar o cristianismo (301 d.C.). Independente da URSS em 1991."},
+  {n:"Austrália",c:"au",m:"Dólar Australiano",l:"Inglês",cap:"Camberra",cont:"Oceania",pop:"26 mi",rpc:"US$ 65.000",lib:8,h:"Habitada por aborígenes há 65 mil anos. Colonizada como colônia penal britânica em 1788, tornou-se federação independente em 1901."},
+  {n:"Áustria",c:"at",m:"Euro",l:"Alemão",cap:"Viena",cont:"Europa",pop:"9,1 mi",rpc:"US$ 56.000",lib:7.5,h:"Centro do Império Habsburgo por 600 anos. Após a 1ª Guerra, perdeu seu império e tornou-se república. Viena foi capital mundial da música."},
+  {n:"Azerbaijão",c:"az",m:"Manat",l:"Azerbaijano",cap:"Baku",cont:"Ásia",pop:"10 mi",rpc:"US$ 7.800",lib:6,h:"Na encruzilhada entre Europa e Ásia. Independente da URSS em 1991. Baku foi um dos primeiros centros petrolíferos do mundo."},
+  {n:"Bahamas",c:"bs",m:"Dólar Bahamense",l:"Inglês",cap:"Nassau",cont:"América Central",pop:"410 mil",rpc:"US$ 35.000",lib:7,h:"Onde Colombo pisou pela primeira vez nas Américas em 1492. Colônia britânica, independente em 1973. Paraíso do turismo."},
+  {n:"Bahrein",c:"bh",m:"Dinar Bareinita",l:"Árabe",cap:"Manama",cont:"Ásia",pop:"1,5 mi",rpc:"US$ 29.000",lib:6.5,h:"Arquipélago no Golfo Pérsico, foi o primeiro país árabe a descobrir petróleo em 1932. Independente do Reino Unido em 1971."},
+  {n:"Bangladesh",c:"bd",m:"Taka",l:"Bengali",cap:"Daca",cont:"Ásia",pop:"173 mi",rpc:"US$ 2.700",lib:5,h:"Era o Paquistão Oriental. Conquistou independência em 1971 após guerra sangrenta. Um dos países mais densamente povoados do mundo."},
+  {n:"Barbados",c:"bb",m:"Dólar de Barbados",l:"Inglês",cap:"Bridgetown",cont:"América Central",pop:"282 mil",rpc:"US$ 18.000",lib:7,h:"Colônia britânica desde 1627. Independente em 1966 e tornou-se república em 2021, removendo a monarquia britânica."},
+  {n:"Bélgica",c:"be",m:"Euro",l:"Holandês",cap:"Bruxelas",cont:"Europa",pop:"11,6 mi",rpc:"US$ 51.000",lib:7,h:"Independente dos Países Baixos em 1830. Dividida entre flamengos e valões. Bruxelas é sede da União Europeia e da OTAN."},
+  {n:"Belize",c:"bz",m:"Dólar de Belize",l:"Inglês",cap:"Belmopã",cont:"América Central",pop:"410 mil",rpc:"US$ 6.800",lib:6,h:"Única nação da América Central com inglês oficial. Foi Honduras Britânica, independente em 1981. Abriga ruínas maias."},
+  {n:"Benin",c:"bj",m:"Franco CFA",l:"Francês",cap:"Porto Novo",cont:"África",pop:"14 mi",rpc:"US$ 1.400",lib:5.5,h:"Berço do antigo Reino do Daomé, famoso por suas guerreiras amazonas. Colônia francesa, independente em 1960."},
+  {n:"Bielorrússia",c:"by",m:"Rublo Bielorrusso",l:"Bielorrusso",cap:"Minsk",cont:"Europa",pop:"9,4 mi",rpc:"US$ 7.600",lib:3,h:"Governada por Lukashenko desde 1994, considerada a última ditadura da Europa. Independente da URSS em 1991."},
+  {n:"Bolívia",c:"bo",m:"Boliviano",l:"Espanhol",cap:"Sucre",cont:"América do Sul",pop:"12 mi",rpc:"US$ 3.600",lib:4,h:"Nomeada em homenagem a Simón Bolívar. Independente da Espanha em 1825. Perdeu acesso ao mar para o Chile em 1884."},
+  {n:"Bósnia e Herzegovina",c:"ba",m:"Marco Conversível",l:"Bósnio",cap:"Saraievo",cont:"Europa",pop:"3,2 mi",rpc:"US$ 8.000",lib:5.5,h:"O assassinato do arquiduque Franz Ferdinand em Saraievo em 1914 iniciou a 1ª Guerra Mundial. Independente da Iugoslávia em 1992, após guerra civil."},
+  {n:"Botsuana",c:"bw",m:"Pula",l:"Inglês",cap:"Gaborone",cont:"África",pop:"2,6 mi",rpc:"US$ 7.500",lib:7,h:"Uma das histórias de sucesso da África: de um dos países mais pobres em 1966 a renda média, graças a diamantes e boa governança."},
+  {n:"Brasil",c:"br",m:"Real",l:"Português",cap:"Brasília",cont:"América do Sul",pop:"216 mi",rpc:"US$ 10.000",lib:5.5,h:"Colônia portuguesa desde 1500. Único país das Américas que se tornou sede de um império europeu (1808). Independente em 1822, república desde 1889."},
+  {n:"Brunei",c:"bn",m:"Dólar de Brunei",l:"Malaio",cap:"Bandar Seri Begawan",cont:"Ásia",pop:"450 mil",rpc:"US$ 37.000",lib:6,h:"Sultanato riquíssimo em petróleo no norte de Bornéu. Já dominou grande parte do Sudeste Asiático. Independente do Reino Unido em 1984."},
+  {n:"Bulgária",c:"bg",m:"Lev",l:"Búlgaro",cap:"Sófia",cont:"Europa",pop:"6,5 mi",rpc:"US$ 14.000",lib:7,h:"O mais antigo estado eslavo, fundado em 681. Domínio otomano de 1396 a 1878. Regime comunista até 1989, membro da UE desde 2007."},
+  {n:"Burkina Faso",c:"bf",m:"Franco CFA",l:"Francês",cap:"Uagadugu",cont:"África",pop:"23 mi",rpc:"US$ 830",lib:5,h:"Antigo Alto Volta, colônia francesa. Renomeada em 1984 pelo revolucionário Thomas Sankara, o 'Che Guevara africano'."},
+  {n:"Burundi",c:"bi",m:"Franco Burundês",l:"Kirundi",cap:"Gitega",cont:"África",pop:"13 mi",rpc:"US$ 240",lib:4,h:"Um dos países mais pobres do mundo. Marcado por conflitos étnicos entre hutus e tutsis. Independente da Bélgica em 1962."},
+  {n:"Butão",c:"bt",m:"Ngultrum",l:"Dzonga",cap:"Timphu",cont:"Ásia",pop:"790 mil",rpc:"US$ 3.500",lib:6,h:"Reino no Himalaia que mede Felicidade Interna Bruta em vez de PIB. Último país do mundo a ter televisão (1999). Monarquia desde o século XVII."},
+  {n:"Cabo Verde",c:"cv",m:"Escudo Cabo-verdiano",l:"Português",cap:"Praia",cont:"África",pop:"600 mil",rpc:"US$ 4.000",lib:6.5,h:"Arquipélago desabitado até os portugueses chegarem em 1456. Foi entreposto do tráfico de escravos. Independente em 1975."},
+  {n:"Camarões",c:"cm",m:"Franco CFA",l:"Francês",cap:"Iaundê",cont:"África",pop:"28 mi",rpc:"US$ 1.700",lib:5,h:"Colônia alemã até a 1ª Guerra, depois dividida entre França e Inglaterra. Chamada de 'África em miniatura' pela diversidade geográfica."},
+  {n:"Camboja",c:"kh",m:"Riel",l:"Khmer",cap:"Phnom Penh",cont:"Ásia",pop:"17 mi",rpc:"US$ 1.800",lib:5.5,h:"Herdeiro do Império Khmer que construiu Angkor Wat. Sofreu genocídio sob o Khmer Vermelho (1975-79) que matou 2 milhões de pessoas."},
+  {n:"Canadá",c:"ca",m:"Dólar Canadense",l:"Inglês",cap:"Ottawa",cont:"América do Norte",pop:"40 mi",rpc:"US$ 55.000",lib:8,h:"Segundo maior país do mundo em área. Colonizado por franceses e britânicos. Confederação independente desde 1867, bilíngue (inglês/francês)."},
+  {n:"Catar",c:"qa",m:"Rial Catarense",l:"Árabe",cap:"Doha",cont:"Ásia",pop:"2,9 mi",rpc:"US$ 88.000",lib:6,h:"Pequena península no Golfo Pérsico que se tornou um dos países mais ricos do mundo graças ao gás natural. Independente do Reino Unido em 1971."},
+  {n:"Cazaquistão",c:"kz",m:"Tenge",l:"Cazaque",cap:"Astana",cont:"Ásia",pop:"20 mi",rpc:"US$ 12.000",lib:6,h:"Maior país sem litoral do mundo. Terra dos nômades das estepes. Independente da URSS em 1991, abriga o cosmódromo de Baikonur."},
+  {n:"Chade",c:"td",m:"Franco CFA",l:"Francês",cap:"N'Djamena",cont:"África",pop:"18 mi",rpc:"US$ 700",lib:4.5,h:"Cruzamento entre a África árabe e subsaariana. Abriga o Lago Chade, que já encolheu 90%. Independente da França em 1960."},
+  {n:"Chile",c:"cl",m:"Peso Chileno",l:"Espanhol",cap:"Santiago",cont:"América do Sul",pop:"19,5 mi",rpc:"US$ 17.000",lib:7.5,h:"País mais longo e estreito do mundo (4.300 km). Independente em 1818. Reformas econômicas liberais o tornaram um dos mais prósperos da América Latina."},
+  {n:"China",c:"cn",m:"Yuan",l:"Mandarim",cap:"Pequim",cont:"Ásia",pop:"1,4 bi",rpc:"US$ 13.000",lib:4,h:"Civilização contínua mais antiga do mundo (5.000 anos). Unificada em 221 a.C. pelo primeiro imperador. República Popular desde 1949 sob o Partido Comunista."},
+  {n:"Chipre",c:"cy",m:"Euro",l:"Grego",cap:"Nicósia",cont:"Europa",pop:"1,3 mi",rpc:"US$ 32.000",lib:7,h:"Ilha no Mediterrâneo, dividida desde 1974 entre gregos no sul e turcos no norte. Nicósia é a última capital dividida da Europa."},
+  {n:"Colômbia",c:"co",m:"Peso Colombiano",l:"Espanhol",cap:"Bogotá",cont:"América do Sul",pop:"52 mi",rpc:"US$ 6.600",lib:6.5,h:"Nomeada em homenagem a Colombo. Independente em 1819 por Simón Bolívar. Superou décadas de conflito com as FARC (acordo de paz em 2016)."},
+  {n:"Comores",c:"km",m:"Franco Comorense",l:"Comorense",cap:"Moroni",cont:"África",pop:"900 mil",rpc:"US$ 1.600",lib:4.5,h:"Arquipélago vulcânico entre Madagascar e Moçambique. Um dos países mais pobres do mundo. Já teve mais de 20 golpes de estado desde 1975."},
+  {n:"República Democrática do Congo",c:"cd",m:"Franco Congolês",l:"Francês",cap:"Kinshasa",cont:"África",pop:"102 mi",rpc:"US$ 580",lib:3.5,h:"Ex-Congo Belga, explorado brutalmente pelo rei Leopoldo II. Rico em minerais (cobalto, coltan) mas devastado por guerras. Independente em 1960."},
+  {n:"República do Congo",c:"cg",m:"Franco CFA",l:"Francês",cap:"Brazzaville",cont:"África",pop:"6 mi",rpc:"US$ 2.200",lib:4,h:"Antiga colônia francesa na margem oposta do rio Congo. Independente em 1960. Economia baseada em petróleo."},
+  {n:"Coreia do Norte",c:"kp",m:"Won Norte-coreano",l:"Coreano",cap:"Pyongyang",cont:"Ásia",pop:"26 mi",rpc:"US$ 1.800",lib:0.5,h:"Dividida da Coreia do Sul em 1945. Ditadura da família Kim desde 1948. Um dos países mais isolados e repressivos do mundo."},
+  {n:"Coreia do Sul",c:"kr",m:"Won Sul-coreano",l:"Coreano",cap:"Seul",cont:"Ásia",pop:"52 mi",rpc:"US$ 35.000",lib:7.5,h:"De país devastado pela guerra em 1953 à 12ª economia do mundo — o 'Milagre do Rio Han'. Berço da Samsung, Hyundai e do K-pop."},
+  {n:"Costa do Marfim",c:"ci",m:"Franco CFA",l:"Francês",cap:"Yamoussoukro",cont:"África",pop:"28 mi",rpc:"US$ 2.500",lib:5.5,h:"Maior produtor de cacau do mundo. Colônia francesa, independente em 1960. A basílica de Yamoussoukro é a maior igreja cristã do mundo."},
+  {n:"Costa Rica",c:"cr",m:"Colón",l:"Espanhol",cap:"San José",cont:"América Central",pop:"5,2 mi",rpc:"US$ 13.000",lib:6.5,h:"Aboliu o exército em 1948, investindo em educação e saúde. Considerado o país mais feliz da América Latina e líder em ecoturismo."},
+  {n:"Croácia",c:"hr",m:"Euro",l:"Croata",cap:"Zagreb",cont:"Europa",pop:"3,9 mi",rpc:"US$ 20.000",lib:6.5,h:"Independente da Iugoslávia em 1991 após guerra. Entrou na UE em 2013 e adotou o euro em 2023. Costa deslumbrante no Adriático."},
+  {n:"Cuba",c:"cu",m:"Peso Cubano",l:"Espanhol",cap:"Havana",cont:"América Central",pop:"11 mi",rpc:"US$ 9.500",lib:1.5,h:"Revolução de Fidel Castro em 1959 derrubou Batista e instaurou regime comunista. Aliada da URSS durante a Guerra Fria, sob embargo americano desde 1962."},
+  {n:"Dinamarca",c:"dk",m:"Coroa Dinamarquesa",l:"Dinamarquês",cap:"Copenhague",cont:"Europa",pop:"5,9 mi",rpc:"US$ 68.000",lib:8,h:"Reino viking que dominou grande parte do norte europeu. Monarquia mais antiga da Europa em funcionamento contínuo. Inclui a Groenlândia."},
+  {n:"Djibuti",c:"dj",m:"Franco Djibutiano",l:"Francês",cap:"Djibuti",cont:"África",pop:"1 mi",rpc:"US$ 3.600",lib:5,h:"Pequeno país estratégico no Chifre da África, junto ao estreito de Bab el-Mandeb. Abriga bases militares de vários países. Independente da França em 1977."},
+  {n:"Dominica",c:"dm",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Roseau",cont:"América Central",pop:"73 mil",rpc:"US$ 9.200",lib:6,h:"Última ilha caribenha a ser colonizada pelos europeus, por causa da resistência dos indígenas carib. Independente do Reino Unido em 1978."},
+  {n:"Egito",c:"eg",m:"Libra Egípcia",l:"Árabe",cap:"Cairo",cont:"África",pop:"105 mi",rpc:"US$ 4.200",lib:5,h:"Berço de uma das civilizações mais antigas (3100 a.C.) com pirâmides, faraós e hieróglifos. O Canal de Suez (1869) conecta o Mediterrâneo ao Mar Vermelho."},
+  {n:"El Salvador",c:"sv",m:"Dólar Americano",l:"Espanhol",cap:"San Salvador",cont:"América Central",pop:"6,3 mi",rpc:"US$ 5.100",lib:6.5,h:"Menor país da América Central. Adotou o Bitcoin como moeda legal em 2021. Superou décadas de violência de gangues com políticas rígidas."},
+  {n:"Emirados Árabes",c:"ae",m:"Dirham",l:"Árabe",cap:"Abu Dhabi",cont:"Ásia",pop:"10 mi",rpc:"US$ 50.000",lib:7.5,h:"Federação de 7 emirados formada em 1971. Dubai e Abu Dhabi transformaram deserto em metrópoles futuristas com o dinheiro do petróleo."},
+  {n:"Equador",c:"ec",m:"Dólar Americano",l:"Espanhol",cap:"Quito",cont:"América do Sul",pop:"18 mi",rpc:"US$ 6.300",lib:5.5,h:"Nomeado pela linha do Equador que o atravessa. Independente em 1830. Inclui as Ilhas Galápagos, onde Darwin desenvolveu a teoria da evolução."},
+  {n:"Eritreia",c:"er",m:"Nakfa",l:"Tigrínia",cap:"Asmara",cont:"África",pop:"3,7 mi",rpc:"US$ 600",lib:1,h:"Conquistou independência da Etiópia em 1993 após 30 anos de guerra. Um dos países mais fechados do mundo, chamada de 'Coreia do Norte da África'."},
+  {n:"Eslováquia",c:"sk",m:"Euro",l:"Eslovaco",cap:"Bratislava",cont:"Europa",pop:"5,4 mi",rpc:"US$ 22.000",lib:7,h:"Separou-se pacificamente da República Tcheca em 1993 (Divórcio de Veludo). Membro da UE e zona do euro."},
+  {n:"Eslovênia",c:"si",m:"Euro",l:"Esloveno",cap:"Liubliana",cont:"Europa",pop:"2,1 mi",rpc:"US$ 32.000",lib:7,h:"Primeira república a se separar da Iugoslávia em 1991, com guerra de apenas 10 dias. País mais próspero do antigo bloco comunista dos Bálcãs."},
+  {n:"Espanha",c:"es",m:"Euro",l:"Espanhol",cap:"Madri",cont:"Europa",pop:"48 mi",rpc:"US$ 32.000",lib:7,h:"Unificada em 1492, mesmo ano da descoberta da América. Teve o maior império colonial do mundo. Transição para democracia após a morte de Franco em 1975."},
+  {n:"Estados Unidos",c:"us",m:"Dólar Americano",l:"Inglês",cap:"Washington D.C.",cont:"América do Norte",pop:"336 mi",rpc:"US$ 80.000",lib:8,h:"13 colônias britânicas declararam independência em 1776. Maior economia e potência militar do mundo. Berço da democracia moderna e da revolução tecnológica."},
+  {n:"Estônia",c:"ee",m:"Euro",l:"Estoniano",cap:"Tallinn",cont:"Europa",pop:"1,3 mi",rpc:"US$ 29.000",lib:8,h:"Pequeno país báltico, pioneiro digital — criou o Skype e foi o primeiro a ter votação pela internet. Independente da URSS em 1991."},
+  {n:"Eswatini",c:"sz",m:"Lilangeni",l:"Suázi",cap:"Mbabane",cont:"África",pop:"1,2 mi",rpc:"US$ 4.100",lib:5.5,h:"Última monarquia absoluta da África. Era Suazilândia até 2018, quando o rei mudou o nome. Independente do Reino Unido em 1968."},
+  {n:"Etiópia",c:"et",m:"Birr",l:"Amárico",cap:"Adis Abeba",cont:"África",pop:"126 mi",rpc:"US$ 1.100",lib:4.5,h:"Um dos países mais antigos do mundo, nunca foi colonizado (exceto breve ocupação italiana). Berço do café e lar da Arca da Aliança segundo tradição."},
+  {n:"Fiji",c:"fj",m:"Dólar Fijiano",l:"Inglês",cap:"Suva",cont:"Oceania",pop:"930 mil",rpc:"US$ 6.200",lib:6,h:"Arquipélago de 330 ilhas no Pacífico Sul. Colônia britânica, independente em 1970. Mistura de culturas melanésia e indiana."},
+  {n:"Filipinas",c:"ph",m:"Peso Filipino",l:"Filipino",cap:"Manila",cont:"Ásia",pop:"117 mi",rpc:"US$ 3.900",lib:6,h:"Nomeada em homenagem ao rei Felipe II da Espanha. Colônia espanhola por 333 anos, depois americana. Independente em 1946, único país católico da Ásia."},
+  {n:"Finlândia",c:"fi",m:"Euro",l:"Finlandês",cap:"Helsinque",cont:"Europa",pop:"5,6 mi",rpc:"US$ 54.000",lib:8,h:"Parte da Suécia por 600 anos, depois da Rússia por 100. Independente em 1917. Melhor sistema educacional do mundo e país mais feliz segundo a ONU."},
+  {n:"França",c:"fr",m:"Euro",l:"Francês",cap:"Paris",cont:"Europa",pop:"68 mi",rpc:"US$ 44.000",lib:6.5,h:"A Revolução Francesa (1789) mudou o mundo com os ideais de liberdade, igualdade e fraternidade. Maior país da Europa Ocidental, potência cultural global."},
+  {n:"Gabão",c:"ga",m:"Franco CFA",l:"Francês",cap:"Libreville",cont:"África",pop:"2,4 mi",rpc:"US$ 8.600",lib:5,h:"Rico em petróleo e florestas. 88% do território é coberto por floresta tropical. A família Bongo governou por mais de 55 anos até golpe em 2023."},
+  {n:"Gâmbia",c:"gm",m:"Dalasi",l:"Inglês",cap:"Banjul",cont:"África",pop:"2,7 mi",rpc:"US$ 840",lib:5.5,h:"Menor país da África continental — uma faixa estreita ao longo do rio Gâmbia, cercada pelo Senegal. Independente do Reino Unido em 1965."},
+  {n:"Gana",c:"gh",m:"Cedi",l:"Inglês",cap:"Acra",cont:"África",pop:"34 mi",rpc:"US$ 2.400",lib:6,h:"Primeiro país da África subsaariana a conquistar independência (1957), liderado por Kwame Nkrumah. Era a Costa do Ouro — rica em ouro e cacau."},
+  {n:"Geórgia",c:"ge",m:"Lari",l:"Georgiano",cap:"Tbilisi",cont:"Ásia",pop:"3,7 mi",rpc:"US$ 8.200",lib:7,h:"Um dos berços do vinho (8.000 anos de tradição). Pátria de Stalin. Independente da URSS em 1991, busca aproximação com a Europa."},
+  {n:"Granada",c:"gd",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Saint George's",cont:"América Central",pop:"125 mil",rpc:"US$ 12.000",lib:6.5,h:"Conhecida como Ilha das Especiarias — maior produtora de noz-moscada do Hemisfério Ocidental. Independente do Reino Unido em 1974."},
+  {n:"Grécia",c:"gr",m:"Euro",l:"Grego",cap:"Atenas",cont:"Europa",pop:"10,3 mi",rpc:"US$ 23.000",lib:6,h:"Berço da democracia, filosofia, Olimpíadas e teatro ocidental. Alexandre Magno criou um dos maiores impérios da história. Berço da civilização ocidental."},
+  {n:"Guatemala",c:"gt",m:"Quetzal",l:"Espanhol",cap:"Cidade da Guatemala",cont:"América Central",pop:"18 mi",rpc:"US$ 5.600",lib:6,h:"Coração da civilização Maia, com pirâmides impressionantes como Tikal. Independente da Espanha em 1821. O quetzal (pássaro) é símbolo nacional."},
+  {n:"Guiana",c:"gy",m:"Dólar da Guiana",l:"Inglês",cap:"Georgetown",cont:"América do Sul",pop:"810 mil",rpc:"US$ 62.000",lib:5.5,h:"Único país de língua inglesa da América do Sul. Recém-descobertas de petróleo a tornaram uma das economias que mais crescem no mundo."},
+  {n:"Guiné",c:"gn",m:"Franco Guineense",l:"Francês",cap:"Conacri",cont:"África",pop:"14 mi",rpc:"US$ 1.300",lib:4.5,h:"Primeira colônia francesa na África a votar pela independência em 1958. Rica em bauxita (alumínio) mas muito pobre."},
+  {n:"Guiné Equatorial",c:"gq",m:"Franco CFA",l:"Espanhol",cap:"Malabo",cont:"África",pop:"1,7 mi",rpc:"US$ 8.500",lib:3,h:"Único país africano com espanhol oficial. Tornou-se rico com petróleo nos anos 1990, mas a riqueza é muito concentrada na elite governante."},
+  {n:"Guiné-Bissau",c:"gw",m:"Franco CFA",l:"Português",cap:"Bissau",cont:"África",pop:"2,1 mi",rpc:"US$ 810",lib:4.5,h:"Colônia portuguesa que lutou pela independência de 1963 a 1974. Um dos países mais instáveis do mundo, com múltiplos golpes militares."},
+  {n:"Haiti",c:"ht",m:"Gourde",l:"Francês",cap:"Porto Príncipe",cont:"América Central",pop:"12 mi",rpc:"US$ 1.800",lib:3.5,h:"Primeira república negra do mundo — escravos se libertaram da França em 1804. País mais pobre das Américas, devastado por terremotos e instabilidade."},
+  {n:"Honduras",c:"hn",m:"Lempira",l:"Espanhol",cap:"Tegucigalpa",cont:"América Central",pop:"10 mi",rpc:"US$ 3.000",lib:5.5,h:"Abriga as ruínas maias de Copán. O nome vem de Colombo: 'Graças a Deus que saímos dessas honduras (águas profundas)'. Independente em 1821."},
+  {n:"Hungria",c:"hu",m:"Florim",l:"Húngaro",cap:"Budapeste",cont:"Europa",pop:"9,6 mi",rpc:"US$ 21.000",lib:6.5,h:"Os magiares chegaram às planícies da Panônia no século IX. Metade do Império Austro-Húngaro. Budapeste é conhecida como a 'Pérola do Danúbio'."},
+  {n:"Iêmen",c:"ye",m:"Rial Iemenita",l:"Árabe",cap:"Sana",cont:"Ásia",pop:"34 mi",rpc:"US$ 630",lib:2,h:"Chamada de Arábia Feliz na antiguidade, terra da Rainha de Sabá. Norte e Sul foram unificados em 1990. Em guerra civil devastadora desde 2014."},
+  {n:"Ilhas Marshall",c:"mh",m:"Dólar Americano",l:"Marshalês",cap:"Majuro",cont:"Oceania",pop:"42 mil",rpc:"US$ 6.000",lib:6,h:"Atol de Bikini foi palco de testes nucleares americanos (1946-58). Independente dos EUA em 1986. Ameaçada pela elevação do nível do mar."},
+  {n:"Ilhas Salomão",c:"sb",m:"Dólar das Ilhas Salomão",l:"Inglês",cap:"Honiara",cont:"Oceania",pop:"730 mil",rpc:"US$ 2.500",lib:6,h:"Palco de batalhas ferozes na 2ª Guerra Mundial (Guadalcanal). Mais de 900 ilhas com enorme diversidade cultural. Independente em 1978."},
+  {n:"Índia",c:"in",m:"Rúpia Indiana",l:"Hindi",cap:"Nova Déli",cont:"Ásia",pop:"1,44 bi",rpc:"US$ 2.700",lib:5.5,h:"Civilização de 5.000 anos, berço do hinduísmo e budismo. Independente do Reino Unido em 1947, liderada por Gandhi. País mais populoso do mundo."},
+  {n:"Indonésia",c:"id",m:"Rúpia Indonésia",l:"Indonésio",cap:"Jacarta",cont:"Ásia",pop:"277 mi",rpc:"US$ 5.000",lib:6,h:"Maior arquipélago do mundo (17.000 ilhas). Maior país muçulmano do mundo. Colônia holandesa por 350 anos, independente em 1945."},
+  {n:"Irã",c:"ir",m:"Rial Iraniano",l:"Persa",cap:"Teerã",cont:"Ásia",pop:"88 mi",rpc:"US$ 4.200",lib:2,h:"Antiga Pérsia, um dos maiores impérios da história (Ciro, o Grande). República islâmica desde a revolução de 1979 que derrubou o xá."},
+  {n:"Iraque",c:"iq",m:"Dinar Iraquiano",l:"Árabe",cap:"Bagdá",cont:"Ásia",pop:"44 mi",rpc:"US$ 5.900",lib:3.5,h:"Berço da civilização na Mesopotâmia — onde surgiu a escrita, a roda e as primeiras cidades. Bagdá foi a maior cidade do mundo medieval."},
+  {n:"Irlanda",c:"ie",m:"Euro",l:"Inglês",cap:"Dublin",cont:"Europa",pop:"5,1 mi",rpc:"US$ 105.000",lib:8,h:"Ilha dos santos e eruditos. A Grande Fome (1845-49) matou 1 milhão e causou emigração massiva. O 'Tigre Celta' a transformou em hub tecnológico europeu."},
+  {n:"Islândia",c:"is",m:"Coroa Islandesa",l:"Islandês",cap:"Reiquiavique",cont:"Europa",pop:"380 mil",rpc:"US$ 75.000",lib:8,h:"Colonizada por vikings no século IX, teve o primeiro parlamento do mundo (Althing, 930 d.C.). Terra de gêiseres, vulcões e energia geotérmica."},
+  {n:"Israel",c:"il",m:"Shekel",l:"Hebraico",cap:"Jerusalém",cont:"Ásia",pop:"9,8 mi",rpc:"US$ 55.000",lib:7,h:"Fundado em 1948 como estado judeu. Jerusalém é sagrada para judeus, cristãos e muçulmanos. Potência em tecnologia e startups (Nação Startup)."},
+  {n:"Itália",c:"it",m:"Euro",l:"Italiano",cap:"Roma",cont:"Europa",pop:"59 mi",rpc:"US$ 36.000",lib:6.5,h:"Centro do Império Romano e berço do Renascimento. Unificada em 1861. Maior patrimônio cultural da UNESCO no mundo. Pátria da pizza, pasta e Ferrari."},
+  {n:"Jamaica",c:"jm",m:"Dólar Jamaicano",l:"Inglês",cap:"Kingston",cont:"América Central",pop:"2,8 mi",rpc:"US$ 6.000",lib:6.5,h:"Pátria do reggae (Bob Marley) e do rastafarismo. Colonizada por Espanha e depois Inglaterra. Independente em 1962. Velocistas lendários nas Olimpíadas."},
+  {n:"Japão",c:"jp",m:"Iene",l:"Japonês",cap:"Tóquio",cont:"Ásia",pop:"124 mi",rpc:"US$ 34.000",lib:7.5,h:"Arquipélago com imperador há mais de 2.600 anos (a mais antiga monarquia do mundo). De devastação na 2ª Guerra à 3ª economia mundial em décadas."},
+  {n:"Jordânia",c:"jo",m:"Dinar Jordaniano",l:"Árabe",cap:"Amã",cont:"Ásia",pop:"11 mi",rpc:"US$ 4.600",lib:6,h:"Lar de Petra, uma das 7 Maravilhas do Mundo Moderno, esculpida na rocha. Reino hashemita independente do Reino Unido desde 1946."},
+  {n:"Kiribati",c:"ki",m:"Dólar Australiano",l:"Inglês",cap:"Taraua do Sul",cont:"Oceania",pop:"130 mil",rpc:"US$ 1.800",lib:6,h:"33 atóis espalhados pelo Pacífico, primeiro país do mundo a ver o nascer do sol cada dia. Ameaçado de desaparecer pela elevação do mar."},
+  {n:"Kosovo",c:"xk",m:"Euro",l:"Albanês",cap:"Pristina",cont:"Europa",pop:"1,8 mi",rpc:"US$ 6.000",lib:6,h:"Declarou independência da Sérvia em 2008 após intervenção da OTAN em 1999. Reconhecido por mais de 100 países, mas não pela ONU."},
+  {n:"Kuwait",c:"kw",m:"Dinar Kuwaitiano",l:"Árabe",cap:"Cidade do Kuwait",cont:"Ásia",pop:"4,3 mi",rpc:"US$ 38.000",lib:6,h:"Pequeno emirado com enormes reservas de petróleo. Invadido pelo Iraque em 1990, libertado pela coalizão liderada pelos EUA na Guerra do Golfo."},
+  {n:"Laos",c:"la",m:"Kip",l:"Lao",cont:"Ásia",cap:"Vienciana",pop:"7,5 mi",rpc:"US$ 2.100",lib:3.5,h:"País mais bombardeado da história per capita (Guerra do Vietnã). Estado comunista desde 1975, um dos últimos do mundo. Rico em rios e montanhas."},
+  {n:"Lesoto",c:"ls",m:"Loti",l:"Sesoto",cap:"Maseru",cont:"África",pop:"2,3 mi",rpc:"US$ 1.200",lib:5,h:"Completamente cercado pela África do Sul — o maior enclave do mundo. Chamado 'Reino no Céu' por estar todo acima de 1.400m. Independente em 1966."},
+  {n:"Letônia",c:"lv",m:"Euro",l:"Letão",cap:"Riga",cont:"Europa",pop:"1,8 mi",rpc:"US$ 22.000",lib:7,h:"País báltico entre Lituânia e Estônia. Independente da URSS em 1991 numa revolução pacífica com corrente humana de 2 milhões de pessoas."},
+  {n:"Líbano",c:"lb",m:"Libra Libanesa",l:"Árabe",cap:"Beirute",cont:"Ásia",pop:"5,5 mi",rpc:"US$ 4.100",lib:5,h:"Terra dos fenícios, inventores do alfabeto. Beirute era 'Paris do Oriente Médio' antes da guerra civil (1975-90). Diáspora libanesa é maior que sua população."},
+  {n:"Libéria",c:"lr",m:"Dólar Liberiano",l:"Inglês",cap:"Monróvia",cont:"África",pop:"5,4 mi",rpc:"US$ 700",lib:5,h:"Fundada em 1847 por escravos americanos libertos. Monróvia homenageia o presidente Monroe. Uma das repúblicas mais antigas da África."},
+  {n:"Líbia",c:"ly",m:"Dinar Líbio",l:"Árabe",cap:"Trípoli",cont:"África",pop:"7 mi",rpc:"US$ 6.500",lib:3,h:"Governada por Muammar Gaddafi de 1969 a 2011 quando foi derrubado. Rica em petróleo mas mergulhada em caos desde então, com governos rivais."},
+  {n:"Liechtenstein",c:"li",m:"Franco Suíço",l:"Alemão",cap:"Vaduz",cont:"Europa",pop:"40 mil",rpc:"US$ 180.000",lib:8,h:"Microestado alpino entre Suíça e Áustria. Um dos países mais ricos do mundo per capita. Mais empresas registradas que habitantes."},
+  {n:"Lituânia",c:"lt",m:"Euro",l:"Lituano",cap:"Vilnius",cont:"Europa",pop:"2,8 mi",rpc:"US$ 25.000",lib:7.5,h:"No século XV, o Grão-Ducado da Lituânia era o maior país da Europa. Primeiro país a declarar independência da URSS em 1990."},
+  {n:"Luxemburgo",c:"lu",m:"Euro",l:"Luxemburguês",cap:"Luxemburgo",cont:"Europa",pop:"660 mil",rpc:"US$ 130.000",lib:8,h:"Grão-ducado minúsculo, mas segundo maior PIB per capita do mundo. Sede de importantes instituições da UE. Centro financeiro global."},
+  {n:"Macedônia do Norte",c:"mk",m:"Denar",l:"Macedônio",cap:"Escópia",cont:"Europa",pop:"1,8 mi",rpc:"US$ 7.600",lib:6.5,h:"Independente da Iugoslávia em 1991. Mudou de nome em 2019 (era só Macedônia) para resolver disputa com a Grécia de Alexandre Magno."},
+  {n:"Madagascar",c:"mg",m:"Ariary",l:"Malgaxe",cap:"Antananarivo",cont:"África",pop:"30 mi",rpc:"US$ 530",lib:5,h:"4ª maior ilha do mundo, separou-se da África há 88 milhões de anos. 80% de suas espécies são únicas (lêmures). Colônia francesa até 1960."},
+  {n:"Malásia",c:"my",m:"Ringgit",l:"Malaio",cap:"Kuala Lumpur",cont:"Ásia",pop:"34 mi",rpc:"US$ 13.000",lib:6.5,h:"Federação multicultural (malaios, chineses, indianos). As Torres Petronas foram os prédios mais altos do mundo. Independente do Reino Unido em 1957."},
+  {n:"Malauí",c:"mw",m:"Kwacha",l:"Inglês",cap:"Lilongwe",cont:"África",pop:"20 mi",rpc:"US$ 640",lib:5.5,h:"Chamado 'Coração Quente da África' pela hospitalidade do povo. O Lago Malauí ocupa um terço do país e tem mais espécies de peixes que qualquer outro lago."},
+  {n:"Maldivas",c:"mv",m:"Rufiyaa",l:"Divehi",cap:"Malé",cont:"Ásia",pop:"520 mil",rpc:"US$ 17.000",lib:5.5,h:"Arquipélago de 1.200 ilhas no Oceano Índico, país mais baixo do mundo (média de 1,5m). Pode desaparecer com a elevação do nível do mar."},
+  {n:"Mali",c:"ml",m:"Franco CFA",l:"Francês",cap:"Bamako",cont:"África",pop:"23 mi",rpc:"US$ 900",lib:4,h:"Lar do lendário Império do Mali e de Mansa Musa, considerado a pessoa mais rica da história. Timbuktu foi centro de conhecimento islâmico."},
+  {n:"Malta",c:"mt",m:"Euro",l:"Maltês",cap:"Valeta",cont:"Europa",pop:"540 mil",rpc:"US$ 35.000",lib:7,h:"Ilha estratégica no centro do Mediterrâneo, disputada por fenícios, romanos, árabes e Cavaleiros de Malta. Independente do Reino Unido em 1964."},
+  {n:"Marrocos",c:"ma",m:"Dirham Marroquino",l:"Árabe",cap:"Rabat",cont:"África",pop:"37 mi",rpc:"US$ 3.800",lib:6,h:"Reino milenar com cultura árabe-berbere. Possui as universidades mais antigas do mundo (Al Quaraouiyine, 859 d.C.). Porta de entrada para a África."},
+  {n:"Maurício",c:"mu",m:"Rúpia Mauriciana",l:"Inglês",cap:"Port Louis",cont:"África",pop:"1,3 mi",rpc:"US$ 12.000",lib:7,h:"Ilha paradisíaca no Índico. Era habitat do dodô, extinto no século XVII. De economia açucareira a centro financeiro e turístico próspero."},
+  {n:"Mauritânia",c:"mr",m:"Ouguiya",l:"Árabe",cap:"Nuakchot",cont:"África",pop:"4,9 mi",rpc:"US$ 2.200",lib:4.5,h:"Ponte entre o Magreb e a África subsaariana. Último país do mundo a abolir oficialmente a escravidão (1981). Quase todo coberto pelo Saara."},
+  {n:"México",c:"mx",m:"Peso Mexicano",l:"Espanhol",cap:"Cidade do México",cont:"América do Norte",pop:"130 mi",rpc:"US$ 13.000",lib:6,h:"Berço das civilizações asteca e maia. Colonizado pela Espanha em 1521. A Cidade do México foi construída sobre as ruínas de Tenochtitlán. Independente em 1821."},
+  {n:"Mianmar",c:"mm",m:"Kyat",l:"Birmanês",cap:"Nepidó",cont:"Ásia",pop:"55 mi",rpc:"US$ 1.200",lib:2.5,h:"Antiga Birmânia, lar de milhares de templos budistas. Aung San Suu Kyi lutou pela democracia. Golpe militar em 2021 reverteu avanços democráticos."},
+  {n:"Micronésia",c:"fm",m:"Dólar Americano",l:"Inglês",cap:"Palikir",cont:"Oceania",pop:"115 mil",rpc:"US$ 3.800",lib:6,h:"607 ilhas espalhadas pelo Pacífico. Inclui as ruínas misteriosas de Nan Madol, a 'Veneza do Pacífico'. Independente dos EUA em 1986."},
+  {n:"Moçambique",c:"mz",m:"Metical",l:"Português",cap:"Maputo",cont:"África",pop:"33 mi",rpc:"US$ 500",lib:4.5,h:"Colônia portuguesa, independente em 1975 após luta armada. Guerra civil de 1977 a 1992. Possui enormes reservas de gás natural recém-descobertas."},
+  {n:"Moldávia",c:"md",m:"Leu Moldavo",l:"Romeno",cap:"Chișinău",cont:"Europa",pop:"2,6 mi",rpc:"US$ 5.800",lib:6,h:"País mais pobre da Europa. Parte da Romênia até 1940, quando a URSS a anexou. Independente em 1991, busca aproximação com a UE."},
+  {n:"Mônaco",c:"mc",m:"Euro",l:"Francês",cap:"Mônaco",cont:"Europa",pop:"40 mil",rpc:"US$ 240.000",lib:7,h:"Segundo menor país do mundo (2 km²), mas maior PIB per capita. Famoso pelo cassino de Monte Carlo e pelo Grande Prêmio de F1. Principado desde 1297."},
+  {n:"Mongólia",c:"mn",m:"Tugrik",l:"Mongol",cap:"Ulan Bator",cont:"Ásia",pop:"3,4 mi",rpc:"US$ 5.200",lib:6,h:"Genghis Khan criou o maior império terrestre da história no século XIII. País de nômades com a menor densidade populacional do mundo."},
+  {n:"Montenegro",c:"me",m:"Euro",l:"Montenegrino",cap:"Podgorica",cont:"Europa",pop:"620 mil",rpc:"US$ 11.000",lib:6,h:"Último país a se separar da Sérvia (2006), por referendo pacífico. Nome significa 'Montanha Negra'. Costa adriática espetacular."},
+  {n:"Namíbia",c:"na",m:"Dólar Namibiano",l:"Inglês",cap:"Windhoek",cont:"África",pop:"2,6 mi",rpc:"US$ 5.000",lib:6.5,h:"Abriga o deserto mais antigo do mundo (Namib, 55 milhões de anos). Colônia alemã, depois sul-africana. Independente em 1990, uma das últimas da África."},
+  {n:"Nauru",c:"nr",m:"Dólar Australiano",l:"Nauruano",cap:"Yaren",cont:"Oceania",pop:"13 mil",rpc:"US$ 12.000",lib:6,h:"Menor república do mundo (21 km²). Ficou riquíssima com fosfato nos anos 70, mas esgotou tudo. Exemplo de como riqueza mineral pode ser uma maldição."},
+  {n:"Nepal",c:"np",m:"Rúpia Nepalesa",l:"Nepalês",cap:"Catmandu",cont:"Ásia",pop:"31 mi",rpc:"US$ 1.400",lib:5.5,h:"Lar do Monte Everest, pico mais alto do mundo (8.849m). Nunca foi colonizado. Único país do mundo com bandeira não retangular (é triangular)."},
+  {n:"Nicarágua",c:"ni",m:"Córdoba",l:"Espanhol",cap:"Manágua",cont:"América Central",pop:"7 mi",rpc:"US$ 2.300",lib:3.5,h:"Maior país da América Central. Revolução sandinista em 1979 derrubou a ditadura Somoza. Daniel Ortega governa com pulso autoritário desde 2007."},
+  {n:"Níger",c:"ne",m:"Franco CFA",l:"Francês",cap:"Niamei",cont:"África",pop:"27 mi",rpc:"US$ 590",lib:4.5,h:"Um dos países mais pobres do mundo, mas com maior taxa de fertilidade (7 filhos por mulher). Dois terços do território estão no deserto do Saara."},
+  {n:"Nigéria",c:"ng",m:"Naira",l:"Inglês",cap:"Abuja",cont:"África",pop:"224 mi",rpc:"US$ 2.200",lib:5.5,h:"País mais populoso da África e maior economia do continente. Mais de 250 grupos étnicos. Nollywood é a 2ª maior indústria de cinema do mundo."},
+  {n:"Noruega",c:"no",m:"Coroa Norueguesa",l:"Norueguês",cap:"Oslo",cont:"Europa",pop:"5,5 mi",rpc:"US$ 90.000",lib:8,h:"Terra dos vikings. Descobriu petróleo no Mar do Norte em 1969 e criou o maior fundo soberano do mundo (US$ 1,4 trilhão). IDH mais alto do planeta."},
+  {n:"Nova Zelândia",c:"nz",m:"Dólar Neozelandês",l:"Inglês",cap:"Wellington",cont:"Oceania",pop:"5,2 mi",rpc:"US$ 48.000",lib:8,h:"Último grande território habitado pelo homem (maoris chegaram ~1300 d.C.). Primeiro país a dar voto às mulheres (1893). Cenário do Senhor dos Anéis."},
+  {n:"Omã",c:"om",m:"Rial Omanense",l:"Árabe",cap:"Mascate",cont:"Ásia",pop:"4,6 mi",rpc:"US$ 23.000",lib:6,h:"Sultanato milenar na ponta da Península Arábica. Grande potência naval que controlou rotas no Índico. O sultão Qaboos modernizou o país de 1970 a 2020."},
+  {n:"Países Baixos",c:"nl",m:"Euro",l:"Holandês",cap:"Amsterdã",cont:"Europa",pop:"17,8 mi",rpc:"US$ 58.000",lib:8,h:"Um quarto do país está abaixo do nível do mar — construíram diques e pôlderes. Potência colonial que fundou Nova York (Nova Amsterdã). Berço de Van Gogh e Rembrandt."},
+  {n:"Palau",c:"pw",m:"Dólar Americano",l:"Palauano",cap:"Ngerulmud",cont:"Oceania",pop:"18 mil",rpc:"US$ 14.000",lib:6.5,h:"Arquipélago de 340 ilhas com águas cristalinas. Uma das menores nações do mundo. Criou o primeiro santuário marinho do Pacífico. Independente dos EUA em 1994."},
+  {n:"Palestina",c:"ps",m:"Shekel",l:"Árabe",cap:"Ramallah",cont:"Ásia",pop:"5,5 mi",rpc:"US$ 3.700",lib:3,h:"Terra disputada há milênios. Busca reconhecimento como estado independente desde 1988. Dividida entre Cisjordânia e Faixa de Gaza."},
+  {n:"Panamá",c:"pa",m:"Balboa",l:"Espanhol",cap:"Cidade do Panamá",cont:"América Central",pop:"4,4 mi",rpc:"US$ 17.000",lib:6.5,h:"O Canal do Panamá (1914) revolucionou o comércio mundial conectando Atlântico e Pacífico. Separou-se da Colômbia em 1903 com apoio dos EUA."},
+  {n:"Papua Nova Guiné",c:"pg",m:"Kina",l:"Inglês",cap:"Port Moresby",cont:"Oceania",pop:"10 mi",rpc:"US$ 2.900",lib:5.5,h:"País com maior diversidade linguística do mundo — mais de 800 línguas! Tribos isoladas vivem em florestas praticamente intocadas. Independente em 1975."},
+  {n:"Paquistão",c:"pk",m:"Rúpia Paquistanesa",l:"Urdu",cap:"Islamabade",cont:"Ásia",pop:"230 mi",rpc:"US$ 1.600",lib:4.5,h:"Criado em 1947 como pátria dos muçulmanos na partição da Índia britânica. Único país muçulmano com armas nucleares. Abriga o K2, 2ª montanha mais alta."},
+  {n:"Paraguai",c:"py",m:"Guarani",l:"Espanhol",cap:"Assunção",cont:"América do Sul",pop:"7,4 mi",rpc:"US$ 6.200",lib:6,h:"Perdeu 90% dos homens na Guerra do Paraguai (1864-70), a mais sangrenta da América do Sul. Único país bilíngue oficial (espanhol e guarani)."},
+  {n:"Peru",c:"pe",m:"Sol",l:"Espanhol",cap:"Lima",cont:"América do Sul",pop:"34 mi",rpc:"US$ 7.800",lib:6.5,h:"Centro do Império Inca, com Machu Picchu como grande símbolo. Conquistado pela Espanha em 1533. Gastronomia reconhecida como uma das melhores do mundo."},
+  {n:"Polônia",c:"pl",m:"Zloty",l:"Polonês",cap:"Varsóvia",cont:"Europa",pop:"38 mi",rpc:"US$ 21.000",lib:7,h:"Desapareceu do mapa por 123 anos (1795-1918), dividida entre Rússia, Prússia e Áustria. Primeira vítima da 2ª Guerra Mundial. Renasceu como potência europeia."},
+  {n:"Portugal",c:"pt",m:"Euro",l:"Português",cap:"Lisboa",cont:"Europa",pop:"10,3 mi",rpc:"US$ 27.000",lib:7,h:"Pequeno país que liderou os Grandes Descobrimentos no século XV. Criou o primeiro império global. Deu ao mundo a língua portuguesa, falada por 260 milhões."},
+  {n:"Quênia",c:"ke",m:"Xelim Queniano",l:"Suaíli",cap:"Nairóbi",cont:"África",pop:"56 mi",rpc:"US$ 2.100",lib:5.5,h:"Berço da humanidade — os fósseis humanos mais antigos foram encontrados aqui. Famoso pelos safáris, Masai Mara e corredores de maratona lendários."},
+  {n:"Quirguistão",c:"kg",m:"Som",l:"Quirguiz",cap:"Bisqueque",cont:"Ásia",pop:"7 mi",rpc:"US$ 1.700",lib:6,h:"País montanhoso da Ásia Central na antiga Rota da Seda. Cultura nômade com yurts (tendas). Independente da URSS em 1991."},
+  {n:"Reino Unido",c:"gb",m:"Libra Esterlina",l:"Inglês",cap:"Londres",cont:"Europa",pop:"68 mi",rpc:"US$ 48.000",lib:8,h:"Criou o maior império da história (um quarto do mundo). Berço da Revolução Industrial, democracia parlamentar e da língua inglesa global."},
+  {n:"República Centro-Africana",c:"cf",m:"Franco CFA",l:"Francês",cap:"Bangui",cont:"África",pop:"5,5 mi",rpc:"US$ 480",lib:3.5,h:"Um dos países mais pobres e instáveis do mundo. O ditador Bokassa se autoproclamou imperador em 1977. Rico em diamantes mas devastado por conflitos."},
+  {n:"República Tcheca",c:"cz",m:"Coroa Tcheca",l:"Tcheco",cap:"Praga",cont:"Europa",pop:"10,8 mi",rpc:"US$ 29.000",lib:7.5,h:"Coração da Europa. Praga é uma das cidades mais bonitas do mundo. Separou-se da Eslováquia em 1993 no Divórcio de Veludo. Pátria da cerveja Pilsner."},
+  {n:"República Dominicana",c:"do",m:"Peso Dominicano",l:"Espanhol",cap:"Santo Domingo",cont:"América Central",pop:"11 mi",rpc:"US$ 10.000",lib:6,h:"Divide a ilha de Hispaniola com o Haiti. Santo Domingo foi a primeira cidade europeia nas Américas (1496). Principal destino turístico do Caribe."},
+  {n:"Romênia",c:"ro",m:"Leu Romeno",l:"Romeno",cap:"Bucareste",cont:"Europa",pop:"19 mi",rpc:"US$ 17.000",lib:7,h:"Herdeira da Dácia romana, única nação de língua latina no leste europeu. A Transilvânia inspirou a lenda do Drácula. Ditadura de Ceaușescu caiu em 1989."},
+  {n:"Ruanda",c:"rw",m:"Franco Ruandês",l:"Kinyarwanda",cap:"Kigali",cont:"África",pop:"14 mi",rpc:"US$ 1.000",lib:5.5,h:"Sofreu genocídio terrível em 1994 (800 mil mortos em 100 dias). Desde então, reergueu-se como um dos países mais limpos e seguros da África."},
+  {n:"Rússia",c:"ru",m:"Rublo",l:"Russo",cap:"Moscou",cont:"Europa",pop:"144 mi",rpc:"US$ 12.000",lib:4,h:"Maior país do mundo em área (11 fusos horários). De czares a revolução comunista (1917) a superpotência soviética. Federação desde 1991."},
+  {n:"Samoa",c:"ws",m:"Tala",l:"Samoano",cap:"Apia",cont:"Oceania",pop:"220 mil",rpc:"US$ 4.300",lib:6.5,h:"Primeiro país do Pacífico a conquistar independência (1962). Cultura polinésia fortíssima. Robert Louis Stevenson (Ilha do Tesouro) viveu e morreu aqui."},
+  {n:"San Marino",c:"sm",m:"Euro",l:"Italiano",cap:"San Marino",cont:"Europa",pop:"34 mil",rpc:"US$ 52.000",lib:7,h:"República mais antiga do mundo em funcionamento contínuo, fundada em 301 d.C. por um pedreiro cristão fugindo da perseguição romana."},
+  {n:"Santa Lúcia",c:"lc",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Castries",cont:"América Central",pop:"180 mil",rpc:"US$ 12.000",lib:6.5,h:"Ilha vulcânica caribenha famosa pelos Pitons (montanhas gêmeas). Mudou de mãos entre França e Inglaterra 14 vezes. Dois prêmios Nobel per capita!"},
+  {n:"São Cristóvão e Névis",c:"kn",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Basseterre",cont:"América Central",pop:"48 mil",rpc:"US$ 21.000",lib:7,h:"Menor país das Américas em área e população. Primeira colônia britânica e francesa no Caribe (1623). Independente em 1983."},
+  {n:"São Tomé e Príncipe",c:"st",m:"Dobra",l:"Português",cap:"São Tomé",cont:"África",pop:"230 mil",rpc:"US$ 2.500",lib:5.5,h:"Duas ilhas vulcânicas no Golfo da Guiné. Colônia portuguesa, primeiro lugar onde se cultivou cacau na África. Independente em 1975."},
+  {n:"São Vicente e Granadinas",c:"vc",m:"Dólar do Caribe Oriental",l:"Inglês",cap:"Kingstown",cont:"América Central",pop:"110 mil",rpc:"US$ 9.000",lib:6.5,h:"Arquipélago caribenho onde foram filmadas cenas de Piratas do Caribe. Última ilha caribenha a ser colonizada, por causa dos guerreiros carib."},
+  {n:"Senegal",c:"sn",m:"Franco CFA",l:"Francês",cap:"Dacar",cont:"África",pop:"18 mi",rpc:"US$ 1.700",lib:6,h:"Porta de entrada da África Ocidental. Gorée foi centro do tráfico de escravos. Democracia estável e berço da música e da cultura da África francófona."},
+  {n:"Serra Leoa",c:"sl",m:"Leone",l:"Inglês",cap:"Freetown",cont:"África",pop:"8,6 mi",rpc:"US$ 500",lib:5,h:"Fundada como refúgio para escravos libertos (Freetown = cidade livre). Devastada por guerra civil (1991-2002) famosa pelos 'diamantes de sangue'."},
+  {n:"Sérvia",c:"rs",m:"Dinar Sérvio",l:"Sérvio",cap:"Belgrado",cont:"Europa",pop:"6,6 mi",rpc:"US$ 10.000",lib:6,h:"Centro do antigo Reino da Iugoslávia. Belgrado é uma das cidades mais antigas da Europa. Novak Djokovic e Nikola Tesla são sérvios famosos."},
+  {n:"Seicheles",c:"sc",m:"Rúpia das Seicheles",l:"Inglês",cap:"Vitória",cont:"África",pop:"100 mil",rpc:"US$ 20.000",lib:6.5,h:"115 ilhas paradisíacas no Índico. Menor país africano em população. De economia de plantação a destino turístico de luxo e preservação ambiental."},
+  {n:"Singapura",c:"sg",m:"Dólar de Singapura",l:"Inglês",cap:"Singapura",cont:"Ásia",pop:"5,9 mi",rpc:"US$ 88.000",lib:9,h:"De vilarejo de pescadores a um dos países mais ricos do mundo em uma geração, sob Lee Kuan Yew. Cidade-estado com zero tolerância à corrupção."},
+  {n:"Síria",c:"sy",m:"Libra Síria",l:"Árabe",cap:"Damasco",cont:"Ásia",pop:"23 mi",rpc:"US$ 530",lib:1.5,h:"Damasco é uma das cidades habitadas mais antigas do mundo (11.000 anos). Guerra civil desde 2011 causou 500 mil mortes e milhões de refugiados."},
+  {n:"Somália",c:"so",m:"Xelim Somali",l:"Somali",cap:"Mogadíscio",cont:"África",pop:"18 mi",rpc:"US$ 450",lib:2,h:"Sem governo central funcional desde 1991. Sofre com pirataria, fome e conflito. A região de Somalilândia declarou independência mas não é reconhecida."},
+  {n:"Sri Lanka",c:"lk",m:"Rúpia do Sri Lanka",l:"Cingalês",cap:"Sri Jayawardenepura Kotte",cont:"Ásia",pop:"22 mi",rpc:"US$ 3.800",lib:5.5,h:"Antiga Ceilão, 'Pérola do Índico'. Guerra civil de 26 anos entre cingaleses e tâmeis até 2009. Grande produtor de chá e safiras."},
+  {n:"Sudão",c:"sd",m:"Libra Sudanesa",l:"Árabe",cap:"Cartum",cont:"África",pop:"48 mi",rpc:"US$ 700",lib:2.5,h:"Lar das pirâmides de Méroe, mais numerosas que as do Egito. Dividido em 2011 quando o Sul se separou. Em guerra civil devastadora desde 2023."},
+  {n:"Sudão do Sul",c:"ss",m:"Libra Sul-sudanesa",l:"Inglês",cap:"Juba",cont:"África",pop:"11 mi",rpc:"US$ 400",lib:2,h:"País mais jovem do mundo (independente em 2011). Mergulhou em guerra civil em 2013. Rico em petróleo mas extremamente pobre e instável."},
+  {n:"Suécia",c:"se",m:"Coroa Sueca",l:"Sueco",cap:"Estocolmo",cont:"Europa",pop:"10,5 mi",rpc:"US$ 58.000",lib:7.5,h:"De guerreiros vikings a modelo de estado de bem-estar social. Neutro em guerras há 200 anos (até entrar na OTAN em 2024). Pátria do Spotify e IKEA."},
+  {n:"Suíça",c:"ch",m:"Franco Suíço",l:"Alemão",cap:"Berna",cont:"Europa",pop:"8,8 mi",rpc:"US$ 100.000",lib:8.5,h:"Neutra desde 1515 — não participa de guerras. 4 idiomas oficiais. Famosa por bancos, relógios, chocolate e democracia direta com referendos frequentes."},
+  {n:"Suriname",c:"sr",m:"Dólar do Suriname",l:"Holandês",cap:"Paramaribo",cont:"América do Sul",pop:"620 mil",rpc:"US$ 5.200",lib:5,h:"Único país de língua holandesa nas Américas. Incrível diversidade étnica (indianos, javaneses, africanos, ameríndios). Independente em 1975."},
+  {n:"Tailândia",c:"th",m:"Baht",l:"Tailandês",cap:"Bangkok",cont:"Ásia",pop:"72 mi",rpc:"US$ 7.600",lib:6.5,h:"Único país do Sudeste Asiático nunca colonizado ('Thai' significa 'livre'). Monarquia reverenciada. Destino turístico mundialmente famoso."},
+  {n:"Taiwan",c:"tw",m:"Dólar de Taiwan",l:"Mandarim",cap:"Taipé",cont:"Ásia",pop:"24 mi",rpc:"US$ 35.000",lib:8,h:"Ilha para onde o governo chinês nacionalista fugiu em 1949. De ditadura a democracia vibrante. Produz 90% dos chips avançados do mundo (TSMC)."},
+  {n:"Tajiquistão",c:"tj",m:"Somoni",l:"Tajique",cap:"Duchambe",cont:"Ásia",pop:"10 mi",rpc:"US$ 1.100",lib:3.5,h:"País montanhoso da Ásia Central — 93% do território são montanhas. Mais pobre das ex-repúblicas soviéticas. Independente da URSS em 1991."},
+  {n:"Tanzânia",c:"tz",m:"Xelim Tanzaniano",l:"Suaíli",cap:"Dodoma",cont:"África",pop:"67 mi",rpc:"US$ 1.200",lib:5,h:"Lar do Kilimanjaro (pico mais alto da África) e do Serengeti. Resultado da união de Tanganyika e Zanzibar em 1964. Berço dos fósseis de Olduvai."},
+  {n:"Timor-Leste",c:"tl",m:"Dólar Americano",l:"Português",cap:"Díli",cont:"Ásia",pop:"1,4 mi",rpc:"US$ 1.700",lib:5.5,h:"Primeiro novo estado soberano do século XXI (2002). Colonizado por Portugal, invadido pela Indonésia em 1975. Lutou 24 anos pela independência."},
+  {n:"Togo",c:"tg",m:"Franco CFA",l:"Francês",cap:"Lomé",cont:"África",pop:"9 mi",rpc:"US$ 1.000",lib:4.5,h:"Uma das nações mais estreitas da África. A família Gnassingbé governa desde 1967 — a mais longa dinastia política do continente."},
+  {n:"Tonga",c:"to",m:"Pa'anga",l:"Tonganês",cap:"Nucualofa",cont:"Oceania",pop:"107 mil",rpc:"US$ 5.100",lib:6,h:"Único reino nativo sobrevivente do Pacífico — nunca foi colonizado. O rei era tão respeitado que todos deviam se abaixar em sua presença."},
+  {n:"Trinidad e Tobago",c:"tt",m:"Dólar de Trinidad",l:"Inglês",cap:"Porto Espanha",cont:"América Central",pop:"1,5 mi",rpc:"US$ 18.000",lib:6.5,h:"Berço do steelpan (único instrumento musical inventado no século XX) e do Carnaval caribenho. Rica em petróleo e gás. Independente em 1962."},
+  {n:"Tunísia",c:"tn",m:"Dinar Tunisiano",l:"Árabe",cap:"Túnis",cont:"África",pop:"12 mi",rpc:"US$ 3.900",lib:5,h:"Lar da antiga Cartago, rival de Roma. Iniciou a Primavera Árabe em 2011. Única democracia surgida daquele movimento, embora enfrente retrocessos."},
+  {n:"Turcomenistão",c:"tm",m:"Manat Turcomeno",l:"Turcomeno",cap:"Asgabate",cont:"Ásia",pop:"6,5 mi",rpc:"US$ 8.000",lib:1.5,h:"Um dos países mais isolados do mundo, com culto à personalidade dos presidentes. Possui a Porta do Inferno — cratera de gás em chamas desde 1971."},
+  {n:"Turquia",c:"tr",m:"Lira Turca",l:"Turco",cap:"Ancara",cont:"Ásia",pop:"86 mi",rpc:"US$ 10.600",lib:5.5,h:"Ponte entre Europa e Ásia. Centro do Império Otomano por 600 anos. Ataturk fundou a república secular moderna em 1923. Istambul já foi Constantinopla."},
+  {n:"Tuvalu",c:"tv",m:"Dólar Australiano",l:"Tuvaluano",cap:"Funafuti",cont:"Oceania",pop:"11 mil",rpc:"US$ 5.000",lib:6,h:"Um dos menores países do mundo. Ganha milhões licenciando seu domínio de internet .tv. Pode ser o primeiro país a desaparecer pela elevação do mar."},
+  {n:"Ucrânia",c:"ua",m:"Hryvnia",l:"Ucraniano",cap:"Kiev",cont:"Europa",pop:"37 mi",rpc:"US$ 5.000",lib:5,h:"Celeiro da Europa por suas terras férteis. Independente da URSS em 1991. Sofre invasão russa desde 2022, defendendo sua soberania."},
+  {n:"Uganda",c:"ug",m:"Xelim Ugandense",l:"Inglês",cap:"Campala",cont:"África",pop:"48 mi",rpc:"US$ 960",lib:5,h:"Churchill a chamou de 'Pérola da África'. Sofreu sob a ditadura de Idi Amin (1971-79). Lar dos últimos gorilas da montanha e das nascentes do Nilo."},
+  {n:"Uruguai",c:"uy",m:"Peso Uruguaio",l:"Espanhol",cap:"Montevidéu",cont:"América do Sul",pop:"3,4 mi",rpc:"US$ 22.000",lib:7,h:"Chamado de 'Suíça da América do Sul'. Primeiro campeão mundial de futebol (1930). Pioneiro em legalização da maconha e energia renovável."},
+  {n:"Uzbequistão",c:"uz",m:"Som Uzbeque",l:"Uzbeque",cap:"Tashkent",cont:"Ásia",pop:"36 mi",rpc:"US$ 2.300",lib:4.5,h:"Coração da Rota da Seda, com cidades lendárias como Samarcanda e Bukhara. Império de Tamerlão no século XIV. Independente da URSS em 1991."},
+  {n:"Vanuatu",c:"vu",m:"Vatu",l:"Bislama",cap:"Port Vila",cont:"Oceania",pop:"320 mil",rpc:"US$ 3.200",lib:6,h:"Arquipélago melanésio com vulcões ativos e bungee jumping original (Naghol — salto com cipós). Um dos países mais felizes segundo pesquisas."},
+  {n:"Vaticano",c:"va",m:"Euro",l:"Italiano",cap:"Cidade do Vaticano",cont:"Europa",pop:"800",rpc:"N/A",lib:5,h:"Menor país do mundo (0,44 km²). Sede da Igreja Católica e residência do Papa. Abriga a Capela Sistina de Michelangelo e a Basílica de São Pedro."},
+  {n:"Venezuela",c:"ve",m:"Bolívar",l:"Espanhol",cap:"Caracas",cont:"América do Sul",pop:"28 mi",rpc:"US$ 3.600",lib:2,h:"Pátria de Simón Bolívar, libertador das Américas. Possui as maiores reservas de petróleo do mundo, mas vive grave crise econômica e humanitária."},
+  {n:"Vietnã",c:"vn",m:"Dong",l:"Vietnamita",cap:"Hanói",cont:"Ásia",pop:"100 mi",rpc:"US$ 4.300",lib:4.5,h:"Derrotou França, EUA e China em guerras no século XX. Reunificado em 1975. De economia devastada a um dos 'tigres asiáticos' emergentes."},
+  {n:"Zâmbia",c:"zm",m:"Kwacha Zambiana",l:"Inglês",cap:"Lusaca",cont:"África",pop:"20 mi",rpc:"US$ 1.200",lib:5.5,h:"Lar das Cataratas Vitória, uma das 7 maravilhas naturais. Antiga Rodésia do Norte, independente em 1964. Economia dependente de cobre."},
+  {n:"Zimbábue",c:"zw",m:"Dólar do Zimbábue",l:"Inglês",cap:"Harare",cont:"África",pop:"16 mi",rpc:"US$ 1.700",lib:3.5,h:"Lar das ruínas do Grande Zimbábue (cidade medieval de pedra). Mugabe governou de 1980 a 2017. Sofreu hiperinflação recorde de 79,6 bilhões % ao mês."}
+];
+
+let TOTAL_Q = 10;
+let mode = '';
+let userEmail = '';
+let currentQ = 0;
+let score = 0;
+let roundCountries = [];
+let selectedAnswer = null;
+let inputsReady = false;
+let timerInterval = null;
+
+function selectQty(btn, n) {
+  TOTAL_Q = n;
+  document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function flagUrl(code) {
+  return `https://flagcdn.com/w320/${code}.png`;
+}
+function flagUrlSmall(code) {
+  return `https://flagcdn.com/w160/${code}.png`;
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickRandom(arr, n, exclude) {
+  const filtered = exclude ? arr.filter(x => x !== exclude) : [...arr];
+  return shuffle(filtered).slice(0, n);
+}
+
+function startQuiz(m) {
+  mode = m;
+  currentQ = 0;
+  score = 0;
+  userEmail = (document.getElementById('emailInput').value || '').trim();
+  roundCountries = shuffle(countries).slice(0, TOTAL_Q);
+  document.getElementById('modeScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('finalScreen').classList.add('hidden');
+  showQuestion();
+}
+
+function showQuestion() {
+  const country = roundCountries[currentQ];
+  const area = document.getElementById('questionArea');
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ}`;
+  document.getElementById('progressFill').style.width = (currentQ / TOTAL_Q * 100) + '%';
+
+  let html = '';
+  const distractors = pickRandom(countries, 3, country);
+  const allOptions = shuffle([country, ...distractors]);
+
+  if (mode === 'flag2country') {
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Qual país tem esta bandeira?</div>
+        <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+        <div class="options">
+          ${allOptions.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)">${o.n}</button>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+  else if (mode === 'country2flag') {
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Qual é a bandeira de:</div>
+        <div class="country-label">${country.n}</div>
+        <div class="options flags-grid">
+          ${allOptions.map(o => `<div class="option-flag" data-value="${o.c}" data-correct="${country.c}" onclick="selectFlag(this)"><img src="${flagUrlSmall(o.c)}" alt="bandeira"></div>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+  else if (mode === 'flag2currency') {
+    const currencyOptions = shuffle([country, ...pickRandom(countries.filter(x => x.m !== country.m), 3)]);
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Qual a moeda do país desta bandeira?</div>
+        <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+        <div class="options">
+          ${currencyOptions.map(o => `<button class="option-btn" data-value="${o.m}" data-correct="${country.m}" onclick="selectText(this)">${o.m}</button>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+  else if (mode === 'flag2language') {
+    const langOptions = shuffle([country, ...pickRandom(countries.filter(x => x.l !== country.l), 3)]);
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Qual o idioma principal do país desta bandeira?</div>
+        <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+        <div class="options">
+          ${langOptions.map(o => `<button class="option-btn" data-value="${o.l}" data-correct="${country.l}" onclick="selectText(this)">${o.l}</button>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+  else if (mode === 'flag2capital') {
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Qual país e capital desta bandeira?</div>
+        <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+        <div class="options">
+          ${allOptions.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)"><strong>${o.n}</strong><br><small>Capital: ${o.cap}</small></button>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+  else if (mode === 'flag2all') {
+    const allOpts = shuffle([country, ...pickRandom(countries.filter(x => x.n !== country.n), 3)]);
+    html = `
+      <div class="question-card">
+        <div class="question-number">Pergunta ${currentQ+1} de ${TOTAL_Q}</div>
+        <div class="question-text">Identifique TUDO sobre esta bandeira!</div>
+        <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+        <div class="options">
+          ${allOpts.map(o => `<button class="option-btn" data-value="${o.n}" data-correct="${country.n}" onclick="selectText(this)"><strong>${o.n}</strong><br><small>Capital: ${o.cap} | Moeda: ${o.m} | Idioma: ${o.l}</small></button>`).join('')}
+        </div>
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+        <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+        <div id="feedbackArea"></div>
+      </div>`;
+  }
+
+  area.innerHTML = html;
+  selectedAnswer = null;
+  inputsReady = false;
+
+  let countdown = 3;
+  const label = document.getElementById('timerLabel');
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      label.textContent = `Liberando em ${countdown}...`;
+    } else {
+      clearInterval(timerInterval);
+      label.textContent = '';
+      inputsReady = true;
+    }
+  }, 1000);
+}
+
+function selectText(btn) {
+  if (!inputsReady) return;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedAnswer = { value: btn.dataset.value, correct: btn.dataset.correct, el: btn };
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function selectFlag(el) {
+  if (!inputsReady) return;
+  document.querySelectorAll('.option-flag').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAnswer = { value: el.dataset.value, correct: el.dataset.correct, el: el };
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function checkAnswer() {
+  if (!selectedAnswer) return;
+  clearInterval(timerInterval);
+  const country = roundCountries[currentQ];
+  const isCorrect = selectedAnswer.value === selectedAnswer.correct;
+
+  if (mode === 'country2flag') {
+    document.querySelectorAll('.option-flag').forEach(el => {
+      el.style.pointerEvents = 'none';
+      if (el.dataset.value === selectedAnswer.correct) el.classList.add('correct');
+      else if (el.dataset.value === selectedAnswer.value && !isCorrect) el.classList.add('wrong');
+    });
+  } else {
+    document.querySelectorAll('.option-btn').forEach(btn => {
+      btn.style.pointerEvents = 'none';
+      if (btn.dataset.value === selectedAnswer.correct) btn.classList.add('correct');
+      else if (btn.dataset.value === selectedAnswer.value && !isCorrect) btn.classList.add('wrong');
+    });
+  }
+
+  if (isCorrect) score++;
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ + 1}`;
+  document.getElementById('submitBtn').classList.add('hidden');
+
+  const mapQuery = encodeURIComponent(country.n);
+  const libColor = country.lib >= 7 ? '#6bff6b' : country.lib >= 5 ? '#ffd93d' : '#ff6b6b';
+  const libLabel = country.lib >= 8 ? 'Muito Livre' : country.lib >= 7 ? 'Livre' : country.lib >= 5 ? 'Moderado' : country.lib >= 3 ? 'Pouco Livre' : 'Reprimido';
+  const libBar = Math.round(country.lib * 10);
+
+  const flagHtml = mode === 'country2flag' ? `<div class="feedback-flag"><img src="${flagUrlSmall(country.c)}"></div>` : '';
+  const feedbackExtra = `
+    ${flagHtml}
+    <div class="feedback-text" style="text-align:center;margin-top:5px">
+      <strong style="font-size:1.2em">${country.n}</strong>
+      <span style="color:#6bb5ff;font-size:0.85em"> — ${country.cont}</span>
+    </div>
+    <div class="country-info">
+      <div class="info-row"><span class="info-label">Capital</span><span class="info-value">${country.cap}</span></div>
+      <div class="info-row"><span class="info-label">População</span><span class="info-value">${country.pop}</span></div>
+      <div class="info-row"><span class="info-label">Moeda</span><span class="info-value">${country.m}</span></div>
+      <div class="info-row"><span class="info-label">Idioma</span><span class="info-value">${country.l}</span></div>
+      <div class="info-row"><span class="info-label">Renda per capita</span><span class="info-value">${country.rpc}</span></div>
+      <div class="info-row">
+        <span class="info-label">Liberdade Econômica</span>
+        <span class="info-value" style="display:flex;align-items:center;gap:6px">
+          <span style="flex:1;height:8px;background:#1a1a3e;border-radius:4px;overflow:hidden"><span style="display:block;width:${libBar}%;height:100%;background:${libColor};border-radius:4px"></span></span>
+          <span style="color:${libColor};font-size:0.8em;white-space:nowrap">${country.lib}/10 ${libLabel}</span>
+        </span>
+      </div>
+      <div class="info-history">${country.h}</div>
+      ${sourceLinks(country.n)}
+    </div>`;
+  const mapHtml = `<div class="feedback-map"><iframe src="https://maps.google.com/maps?q=${mapQuery}&t=k&z=5&output=embed" allowfullscreen loading="lazy"></iframe></div>`;
+
+  const fb = document.getElementById('feedbackArea');
+  fb.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="feedback-icon">${isCorrect ? '&#10024; ACERTOU! &#10024;' : '&#10060; Errou!'}</div>
+      ${feedbackExtra}
+      ${mapHtml}
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">${currentQ < TOTAL_Q - 1 ? 'PRÓXIMA &#10132;' : 'VER RESULTADO &#127942;'}</button>
+  `;
+
+  selectedAnswer = null;
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < TOTAL_Q) {
+    showQuestion();
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  const final = document.getElementById('finalScreen');
+  final.classList.remove('hidden');
+
+  const pct = Math.round(score / TOTAL_Q * 100);
+  let cls, emoji, msg;
+  if (pct >= 80) { cls = 'great'; emoji = '&#127775;'; msg = 'Você é um MESTRE da geografia mundial!'; }
+  else if (pct >= 50) { cls = 'good'; emoji = '&#128170;'; msg = 'Muito bom! Continue treinando e logo domina todas!'; }
+  else { cls = 'try-again'; emoji = '&#128640;'; msg = 'O mundo é enorme! Continue jogando para aprender mais!'; }
+
+  const modeNames = {
+    flag2country: 'Bandeira → País',
+    country2flag: 'País → Bandeira',
+    flag2capital: 'Bandeira → País e Capital',
+    flag2currency: 'Bandeira → Moeda',
+    flag2language: 'Bandeira → Idioma',
+    flag2all: 'Bandeira → Tudo'
+  };
+
+  final.innerHTML = `
+    <div class="final-screen">
+      <h1>RESULTADO</h1>
+      <div style="font-size:3em">${emoji}</div>
+      <div class="final-score ${cls}">${score}/${TOTAL_Q}</div>
+      <div class="final-msg">${msg}</div>
+      <div style="color:#8888cc;margin-bottom:20px">Modo: ${modeNames[mode]} | Acurácia: ${pct}%</div>
+      ${userEmail ? `<div id="emailStatus" style="color:#6bff6b;margin-bottom:15px;font-size:0.85em">Enviando resultado para ${userEmail}...</div>` : ''}
+      <button class="restart-btn" onclick="startQuiz('${mode}')">JOGAR MESMO MODO</button>
+      <button class="restart-btn" onclick="backToModes()">TROCAR MODO</button>
+    </div>
+  `;
+
+  if (userEmail) sendResult(pct, modeNames[mode]);
+}
+
+function sendResult(pct, modeName) {
+  const subject = encodeURIComponent(`QuizX - Bandeiras do Mundo: ${score}/${TOTAL_Q} (${pct}%)`);
+  const lines = [`QuizX - Bandeiras do Mundo`, ``, `Modo: ${modeName}`, `Resultado: ${score}/${TOTAL_Q} (${pct}%)`, ``, `Detalhes:`];
+  roundCountries.forEach((c, i) => {
+    lines.push(`${i+1}. ${c.n} — Capital: ${c.cap} | Moeda: ${c.m} | Idioma: ${c.l}`);
+  });
+  lines.push(``, `---`, `Enviado por QuizX`);
+  const body = encodeURIComponent(lines.join('\n'));
+  const mailto = `mailto:${userEmail}?subject=${subject}&body=${body}`;
+  window.open(mailto, '_blank');
+  const st = document.getElementById('emailStatus');
+  if (st) st.textContent = `E-mail preparado para ${userEmail}!`;
+}
+
+function backToModes() {
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('countryDetailScreen').classList.add('hidden');
+  document.getElementById('modeScreen').classList.remove('hidden');
+}
+
+function britannicaUrl(name) {
+  const map = {"Afeganistão":"Afghanistan","África do Sul":"South-Africa","Albânia":"Albania","Alemanha":"Germany","Andorra":"Andorra","Angola":"Angola","Antígua e Barbuda":"Antigua-and-Barbuda","Arábia Saudita":"Saudi-Arabia","Argélia":"Algeria","Argentina":"Argentina","Armênia":"Armenia","Austrália":"Australia","Áustria":"Austria","Azerbaijão":"Azerbaijan","Bahamas":"The-Bahamas","Bahrein":"Bahrain","Bangladesh":"Bangladesh","Barbados":"Barbados","Bélgica":"Belgium","Belize":"Belize","Benin":"Benin","Bielorrússia":"Belarus","Bolívia":"Bolivia","Bósnia e Herzegovina":"Bosnia-and-Herzegovina","Botsuana":"Botswana","Brasil":"Brazil","Brunei":"Brunei","Bulgária":"Bulgaria","Burkina Faso":"Burkina-Faso","Burundi":"Burundi","Butão":"Bhutan","Cabo Verde":"Cabo-Verde","Camarões":"Cameroon","Camboja":"Cambodia","Canadá":"Canada","Catar":"Qatar","Cazaquistão":"Kazakhstan","Chade":"Chad","Chile":"Chile","China":"China","Chipre":"Cyprus","Colômbia":"Colombia","Comores":"Comoros","República Democrática do Congo":"Democratic-Republic-of-the-Congo","República do Congo":"Republic-of-the-Congo","Coreia do Norte":"North-Korea","Coreia do Sul":"South-Korea","Costa do Marfim":"Cote-dIvoire","Costa Rica":"Costa-Rica","Croácia":"Croatia","Cuba":"Cuba","Dinamarca":"Denmark","Djibuti":"Djibouti","Dominica":"Dominica","Egito":"Egypt","El Salvador":"El-Salvador","Emirados Árabes":"United-Arab-Emirates","Equador":"Ecuador","Eritreia":"Eritrea","Eslováquia":"Slovakia","Eslovênia":"Slovenia","Espanha":"Spain","Estados Unidos":"United-States","Estônia":"Estonia","Eswatini":"Eswatini","Etiópia":"Ethiopia","Fiji":"Fiji","Filipinas":"Philippines","Finlândia":"Finland","França":"France","Gabão":"Gabon","Gâmbia":"The-Gambia","Gana":"Ghana","Geórgia":"Georgia","Granada":"Grenada","Grécia":"Greece","Guatemala":"Guatemala","Guiana":"Guyana","Guiné":"Guinea","Guiné Equatorial":"Equatorial-Guinea","Guiné-Bissau":"Guinea-Bissau","Haiti":"Haiti","Honduras":"Honduras","Hungria":"Hungary","Iêmen":"Yemen","Ilhas Marshall":"Marshall-Islands","Ilhas Salomão":"Solomon-Islands","Índia":"India","Indonésia":"Indonesia","Irã":"Iran","Iraque":"Iraq","Irlanda":"Ireland","Islândia":"Iceland","Israel":"Israel","Itália":"Italy","Jamaica":"Jamaica","Japão":"Japan","Jordânia":"Jordan","Kiribati":"Kiribati","Kosovo":"Kosovo","Kuwait":"Kuwait","Laos":"Laos","Lesoto":"Lesotho","Letônia":"Latvia","Líbano":"Lebanon","Libéria":"Liberia","Líbia":"Libya","Liechtenstein":"Liechtenstein","Lituânia":"Lithuania","Luxemburgo":"Luxembourg","Macedônia do Norte":"North-Macedonia","Madagascar":"Madagascar","Malásia":"Malaysia","Malauí":"Malawi","Maldivas":"Maldives","Mali":"Mali","Malta":"Malta","Marrocos":"Morocco","Maurício":"Mauritius","Mauritânia":"Mauritania","México":"Mexico","Mianmar":"Myanmar","Micronésia":"Federated-States-of-Micronesia","Moçambique":"Mozambique","Moldávia":"Moldova","Mônaco":"Monaco","Mongólia":"Mongolia","Montenegro":"Montenegro","Namíbia":"Namibia","Nauru":"Nauru","Nepal":"Nepal","Nicarágua":"Nicaragua","Níger":"Niger","Nigéria":"Nigeria","Noruega":"Norway","Nova Zelândia":"New-Zealand","Omã":"Oman","Países Baixos":"Netherlands","Palau":"Palau","Palestina":"Palestine","Panamá":"Panama","Papua Nova Guiné":"Papua-New-Guinea","Paquistão":"Pakistan","Paraguai":"Paraguay","Peru":"Peru","Polônia":"Poland","Portugal":"Portugal","Quênia":"Kenya","Quirguistão":"Kyrgyzstan","Reino Unido":"United-Kingdom","República Centro-Africana":"Central-African-Republic","República Tcheca":"Czech-Republic","República Dominicana":"Dominican-Republic","Romênia":"Romania","Ruanda":"Rwanda","Rússia":"Russia","Samoa":"Samoa","San Marino":"San-Marino","Santa Lúcia":"Saint-Lucia","São Cristóvão e Névis":"Saint-Kitts-and-Nevis","São Tomé e Príncipe":"Sao-Tome-and-Principe","São Vicente e Granadinas":"Saint-Vincent-and-the-Grenadines","Senegal":"Senegal","Serra Leoa":"Sierra-Leone","Sérvia":"Serbia","Seicheles":"Seychelles","Singapura":"Singapore","Síria":"Syria","Somália":"Somalia","Sri Lanka":"Sri-Lanka","Sudão":"Sudan","Sudão do Sul":"South-Sudan","Suécia":"Sweden","Suíça":"Switzerland","Suriname":"Suriname","Tailândia":"Thailand","Taiwan":"Taiwan","Tajiquistão":"Tajikistan","Tanzânia":"Tanzania","Timor-Leste":"East-Timor","Togo":"Togo","Tonga":"Tonga","Trinidad e Tobago":"Trinidad-and-Tobago","Tunísia":"Tunisia","Turcomenistão":"Turkmenistan","Turquia":"Turkey","Tuvalu":"Tuvalu","Ucrânia":"Ukraine","Uganda":"Uganda","Uruguai":"Uruguay","Uzbequistão":"Uzbekistan","Vanuatu":"Vanuatu","Vaticano":"Vatican-City","Venezuela":"Venezuela","Vietnã":"Vietnam","Zâmbia":"Zambia","Zimbábue":"Zimbabwe"};
+  const slug = map[name] || name.replace(/ /g, '-');
+  return `https://www.britannica.com/place/${slug}`;
+}
+function heritageUrl(name) {
+  const map = {"Afeganistão":"afghanistan","África do Sul":"south-africa","Albânia":"albania","Alemanha":"germany","Andorra":"andorra","Angola":"angola","Antígua e Barbuda":"antigua-and-barbuda","Arábia Saudita":"saudi-arabia","Argélia":"algeria","Argentina":"argentina","Armênia":"armenia","Austrália":"australia","Áustria":"austria","Azerbaijão":"azerbaijan","Bahamas":"bahamas","Bahrein":"bahrain","Bangladesh":"bangladesh","Barbados":"barbados","Bélgica":"belgium","Belize":"belize","Benin":"benin","Bielorrússia":"belarus","Bolívia":"bolivia","Bósnia e Herzegovina":"bosnia-and-herzegovina","Botsuana":"botswana","Brasil":"brazil","Brunei":"brunei","Bulgária":"bulgaria","Burkina Faso":"burkina-faso","Burundi":"burundi","Butão":"bhutan","Cabo Verde":"cabo-verde","Camarões":"cameroon","Camboja":"cambodia","Canadá":"canada","Catar":"qatar","Cazaquistão":"kazakhstan","Chade":"chad","Chile":"chile","China":"china","Chipre":"cyprus","Colômbia":"colombia","Comores":"comoros","República Democrática do Congo":"democratic-republic-of-congo","República do Congo":"republic-of-congo","Coreia do Norte":"north-korea","Coreia do Sul":"south-korea","Costa do Marfim":"cote-divoire","Costa Rica":"costa-rica","Croácia":"croatia","Cuba":"cuba","Dinamarca":"denmark","Djibuti":"djibouti","Dominica":"dominica","Egito":"egypt","El Salvador":"el-salvador","Emirados Árabes":"united-arab-emirates","Equador":"ecuador","Eritreia":"eritrea","Eslováquia":"slovakia","Eslovênia":"slovenia","Espanha":"spain","Estados Unidos":"united-states","Estônia":"estonia","Eswatini":"eswatini","Etiópia":"ethiopia","Fiji":"fiji","Filipinas":"philippines","Finlândia":"finland","França":"france","Gabão":"gabon","Gâmbia":"gambia","Gana":"ghana","Geórgia":"georgia","Granada":"grenada","Grécia":"greece","Guatemala":"guatemala","Guiana":"guyana","Guiné":"guinea","Guiné Equatorial":"equatorial-guinea","Guiné-Bissau":"guinea-bissau","Haiti":"haiti","Honduras":"honduras","Hungria":"hungary","Iêmen":"yemen","Ilhas Marshall":"marshall-islands","Ilhas Salomão":"solomon-islands","Índia":"india","Indonésia":"indonesia","Irã":"iran","Iraque":"iraq","Irlanda":"ireland","Islândia":"iceland","Israel":"israel","Itália":"italy","Jamaica":"jamaica","Japão":"japan","Jordânia":"jordan","Kiribati":"kiribati","Kosovo":"kosovo","Kuwait":"kuwait","Laos":"laos","Lesoto":"lesotho","Letônia":"latvia","Líbano":"lebanon","Libéria":"liberia","Líbia":"libya","Liechtenstein":"liechtenstein","Lituânia":"lithuania","Luxemburgo":"luxembourg","Macedônia do Norte":"north-macedonia","Madagascar":"madagascar","Malásia":"malaysia","Malauí":"malawi","Maldivas":"maldives","Mali":"mali","Malta":"malta","Marrocos":"morocco","Maurício":"mauritius","Mauritânia":"mauritania","México":"mexico","Mianmar":"myanmar","Micronésia":"micronesia","Moçambique":"mozambique","Moldávia":"moldova","Mônaco":"monaco","Mongólia":"mongolia","Montenegro":"montenegro","Namíbia":"namibia","Nauru":"nauru","Nepal":"nepal","Nicarágua":"nicaragua","Níger":"niger","Nigéria":"nigeria","Noruega":"norway","Nova Zelândia":"new-zealand","Omã":"oman","Países Baixos":"netherlands","Palau":"palau","Palestina":"palestine","Panamá":"panama","Papua Nova Guiné":"papua-new-guinea","Paquistão":"pakistan","Paraguai":"paraguay","Peru":"peru","Polônia":"poland","Portugal":"portugal","Quênia":"kenya","Quirguistão":"kyrgyzstan","Reino Unido":"united-kingdom","República Centro-Africana":"central-african-republic","República Tcheca":"czech-republic","República Dominicana":"dominican-republic","Romênia":"romania","Ruanda":"rwanda","Rússia":"russia","Samoa":"samoa","San Marino":"san-marino","Santa Lúcia":"saint-lucia","São Cristóvão e Névis":"saint-kitts-and-nevis","São Tomé e Príncipe":"sao-tome-and-principe","São Vicente e Granadinas":"saint-vincent-and-the-grenadines","Senegal":"senegal","Serra Leoa":"sierra-leone","Sérvia":"serbia","Seicheles":"seychelles","Singapura":"singapore","Síria":"syria","Somália":"somalia","Sri Lanka":"sri-lanka","Sudão":"sudan","Sudão do Sul":"south-sudan","Suécia":"sweden","Suíça":"switzerland","Suriname":"suriname","Tailândia":"thailand","Taiwan":"taiwan","Tajiquistão":"tajikistan","Tanzânia":"tanzania","Timor-Leste":"timor-leste","Togo":"togo","Tonga":"tonga","Trinidad e Tobago":"trinidad-and-tobago","Tunísia":"tunisia","Turcomenistão":"turkmenistan","Turquia":"turkey","Tuvalu":"tuvalu","Ucrânia":"ukraine","Uganda":"uganda","Uruguai":"uruguay","Uzbequistão":"uzbekistan","Vanuatu":"vanuatu","Vaticano":"vatican-city","Venezuela":"venezuela","Vietnã":"vietnam","Zâmbia":"zambia","Zimbábue":"zimbabwe"};
+  const slug = map[name] || name.toLowerCase().replace(/ /g, '-');
+  return `https://www.heritage.org/index/pages/country-pages/${slug}`;
+}
+function ciaUrl(name) {
+  const map = {"Afeganistão":"afghanistan","África do Sul":"south-africa","Albânia":"albania","Alemanha":"germany","Andorra":"andorra","Angola":"angola","Antígua e Barbuda":"antigua-and-barbuda","Arábia Saudita":"saudi-arabia","Argélia":"algeria","Argentina":"argentina","Armênia":"armenia","Austrália":"australia","Áustria":"austria","Azerbaijão":"azerbaijan","Bahamas":"bahamas-the","Bahrein":"bahrain","Bangladesh":"bangladesh","Barbados":"barbados","Bélgica":"belgium","Belize":"belize","Benin":"benin","Bielorrússia":"belarus","Bolívia":"bolivia","Bósnia e Herzegovina":"bosnia-and-herzegovina","Botsuana":"botswana","Brasil":"brazil","Brunei":"brunei","Bulgária":"bulgaria","Burkina Faso":"burkina-faso","Burundi":"burundi","Butão":"bhutan","Cabo Verde":"cabo-verde","Camarões":"cameroon","Camboja":"cambodia","Canadá":"canada","Catar":"qatar","Cazaquistão":"kazakhstan","Chade":"chad","Chile":"chile","China":"china","Chipre":"cyprus","Colômbia":"colombia","Comores":"comoros","República Democrática do Congo":"congo-democratic-republic-of-the","República do Congo":"congo-republic-of-the","Coreia do Norte":"korea-north","Coreia do Sul":"korea-south","Costa do Marfim":"cote-divoire","Costa Rica":"costa-rica","Croácia":"croatia","Cuba":"cuba","Dinamarca":"denmark","Djibuti":"djibouti","Dominica":"dominica","Egito":"egypt","El Salvador":"el-salvador","Emirados Árabes":"united-arab-emirates","Equador":"ecuador","Eritreia":"eritrea","Eslováquia":"slovakia","Eslovênia":"slovenia","Espanha":"spain","Estados Unidos":"united-states","Estônia":"estonia","Eswatini":"eswatini","Etiópia":"ethiopia","Fiji":"fiji","Filipinas":"philippines","Finlândia":"finland","França":"france","Gabão":"gabon","Gâmbia":"gambia-the","Gana":"ghana","Geórgia":"georgia","Granada":"grenada","Grécia":"greece","Guatemala":"guatemala","Guiana":"guyana","Guiné":"guinea","Guiné Equatorial":"equatorial-guinea","Guiné-Bissau":"guinea-bissau","Haiti":"haiti","Honduras":"honduras","Hungria":"hungary","Iêmen":"yemen","Ilhas Marshall":"marshall-islands","Ilhas Salomão":"solomon-islands","Índia":"india","Indonésia":"indonesia","Irã":"iran","Iraque":"iraq","Irlanda":"ireland","Islândia":"iceland","Israel":"israel","Itália":"italy","Jamaica":"jamaica","Japão":"japan","Jordânia":"jordan","Kiribati":"kiribati","Kosovo":"kosovo","Kuwait":"kuwait","Laos":"laos","Lesoto":"lesotho","Letônia":"latvia","Líbano":"lebanon","Libéria":"liberia","Líbia":"libya","Liechtenstein":"liechtenstein","Lituânia":"lithuania","Luxemburgo":"luxembourg","Macedônia do Norte":"north-macedonia","Madagascar":"madagascar","Malásia":"malaysia","Malauí":"malawi","Maldivas":"maldives","Mali":"mali","Malta":"malta","Marrocos":"morocco","Maurício":"mauritius","Mauritânia":"mauritania","México":"mexico","Mianmar":"burma","Micronésia":"micronesia-federated-states-of","Moçambique":"mozambique","Moldávia":"moldova","Mônaco":"monaco","Mongólia":"mongolia","Montenegro":"montenegro","Namíbia":"namibia","Nauru":"nauru","Nepal":"nepal","Nicarágua":"nicaragua","Níger":"niger","Nigéria":"nigeria","Noruega":"norway","Nova Zelândia":"new-zealand","Omã":"oman","Países Baixos":"netherlands","Palau":"palau","Palestina":"west-bank","Panamá":"panama","Papua Nova Guiné":"papua-new-guinea","Paquistão":"pakistan","Paraguai":"paraguay","Peru":"peru","Polônia":"poland","Portugal":"portugal","Quênia":"kenya","Quirguistão":"kyrgyzstan","Reino Unido":"united-kingdom","República Centro-Africana":"central-african-republic","República Tcheca":"czechia","República Dominicana":"dominican-republic","Romênia":"romania","Ruanda":"rwanda","Rússia":"russia","Samoa":"samoa","San Marino":"san-marino","Santa Lúcia":"saint-lucia","São Cristóvão e Névis":"saint-kitts-and-nevis","São Tomé e Príncipe":"sao-tome-and-principe","São Vicente e Granadinas":"saint-vincent-and-the-grenadines","Senegal":"senegal","Serra Leoa":"sierra-leone","Sérvia":"serbia","Seicheles":"seychelles","Singapura":"singapore","Síria":"syria","Somália":"somalia","Sri Lanka":"sri-lanka","Sudão":"sudan","Sudão do Sul":"south-sudan","Suécia":"sweden","Suíça":"switzerland","Suriname":"suriname","Tailândia":"thailand","Taiwan":"taiwan","Tajiquistão":"tajikistan","Tanzânia":"tanzania","Timor-Leste":"timor-leste","Togo":"togo","Tonga":"tonga","Trinidad e Tobago":"trinidad-and-tobago","Tunísia":"tunisia","Turcomenistão":"turkmenistan","Turquia":"turkey","Tuvalu":"tuvalu","Ucrânia":"ukraine","Uganda":"uganda","Uruguai":"uruguay","Uzbequistão":"uzbekistan","Vanuatu":"vanuatu","Vaticano":"holy-see-vatican-city","Venezuela":"venezuela","Vietnã":"vietnam","Zâmbia":"zambia","Zimbábue":"zimbabwe"};
+  const slug = map[name] || name.toLowerCase().replace(/ /g, '-');
+  return `https://www.cia.gov/the-world-factbook/countries/${slug}/`;
+}
+function sourceLinks(name) {
+  return `<div style="margin-top:10px;text-align:center;display:flex;flex-wrap:wrap;justify-content:center;gap:8px">
+    <a href="${britannicaUrl(name)}" target="_blank" style="color:#6bb5ff;font-size:0.78em;text-decoration:none;padding:4px 10px;border:1px solid #3a3a8e;border-radius:6px">&#128214; Britannica</a>
+    <a href="${heritageUrl(name)}" target="_blank" style="color:#6bff6b;font-size:0.78em;text-decoration:none;padding:4px 10px;border:1px solid #3a3a8e;border-radius:6px">&#127970; Heritage Foundation</a>
+    <a href="${ciaUrl(name)}" target="_blank" style="color:#ffd93d;font-size:0.78em;text-decoration:none;padding:4px 10px;border:1px solid #3a3a8e;border-radius:6px">&#127758; CIA World Factbook</a>
+  </div>`;
+}
+
+function filterCountries() {
+  const input = document.getElementById('countrySearch').value.trim().toLowerCase();
+  const dropdown = document.getElementById('countryDropdown');
+  if (!input) { dropdown.classList.add('hidden'); return; }
+  const norm = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  const matches = countries.filter(c => norm(c.n).includes(norm(input))).slice(0, 15);
+  if (matches.length === 0) { dropdown.classList.add('hidden'); return; }
+  dropdown.innerHTML = matches.map(c =>
+    `<div class="country-dropdown-item" onclick="showCountryDetail('${c.c}')"><img src="${flagUrlSmall(c.c)}"> ${c.n}</div>`
+  ).join('');
+  dropdown.classList.remove('hidden');
+}
+
+function showCountryDetail(code) {
+  const country = countries.find(c => c.c === code);
+  if (!country) return;
+  document.getElementById('countrySearch').value = '';
+  document.getElementById('countryDropdown').classList.add('hidden');
+  document.getElementById('modeScreen').classList.add('hidden');
+  const detail = document.getElementById('countryDetailScreen');
+  detail.classList.remove('hidden');
+
+  const mapQuery = encodeURIComponent(country.n);
+  const libColor = country.lib >= 7 ? '#6bff6b' : country.lib >= 5 ? '#ffd93d' : '#ff6b6b';
+  const libLabel = country.lib >= 8 ? 'Muito Livre' : country.lib >= 7 ? 'Livre' : country.lib >= 5 ? 'Moderado' : country.lib >= 3 ? 'Pouco Livre' : 'Reprimido';
+  const libBar = Math.round(country.lib * 10);
+
+  document.getElementById('countryDetailArea').innerHTML = `
+    <div class="question-card">
+      <div class="flag-display"><img src="${flagUrl(country.c)}" alt="bandeira"></div>
+      <div style="text-align:center;margin-bottom:15px">
+        <strong style="font-size:1.4em;color:#fff">${country.n}</strong>
+        <span style="color:#6bb5ff;font-size:0.9em"> — ${country.cont}</span>
+      </div>
+      <div class="country-info">
+        <div class="info-row"><span class="info-label">Capital</span><span class="info-value">${country.cap}</span></div>
+        <div class="info-row"><span class="info-label">População</span><span class="info-value">${country.pop}</span></div>
+        <div class="info-row"><span class="info-label">Moeda</span><span class="info-value">${country.m}</span></div>
+        <div class="info-row"><span class="info-label">Idioma</span><span class="info-value">${country.l}</span></div>
+        <div class="info-row"><span class="info-label">Renda per capita</span><span class="info-value">${country.rpc}</span></div>
+        <div class="info-row">
+          <span class="info-label">Liberdade Econômica</span>
+          <span class="info-value" style="display:flex;align-items:center;gap:6px">
+            <span style="flex:1;height:8px;background:#1a1a3e;border-radius:4px;overflow:hidden"><span style="display:block;width:${libBar}%;height:100%;background:${libColor};border-radius:4px"></span></span>
+            <span style="color:${libColor};font-size:0.8em;white-space:nowrap">${country.lib}/10 ${libLabel}</span>
+          </span>
+        </div>
+        <div class="info-history">${country.h}</div>
+        <div style="margin-top:10px;text-align:center">
+          ${sourceLinks(country.n)}
+        </div>
+      </div>
+      <div class="feedback-map"><iframe src="https://maps.google.com/maps?q=${mapQuery}&t=k&z=5&output=embed" allowfullscreen loading="lazy"></iframe></div>
+    </div>`;
+}
+
+function backFromDetail() {
+  document.getElementById('countryDetailScreen').classList.add('hidden');
+  document.getElementById('modeScreen').classList.remove('hidden');
+}
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('countryDropdown');
+  const search = document.getElementById('countrySearch');
+  if (!dropdown || !search) return;
+  if (e.target.closest('.country-dropdown-item')) return;
+  if (!dropdown.contains(e.target) && e.target !== search) {
+    dropdown.classList.add('hidden');
+  }
+});
+</script>
+</body>
+</html>

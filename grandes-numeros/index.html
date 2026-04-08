@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizX - Grandes Números</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Space Mono', monospace;
+    background: #0a0a2e;
+    color: #e0e0ff;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s infinite alternate;
+  }
+
+  @keyframes twinkle {
+    0% { opacity: 0.2; transform: scale(1); }
+    100% { opacity: 1; transform: scale(1.3); }
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 800px; margin: 0 auto; padding: 20px;
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    text-align: center;
+    font-size: 2.2em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b, #6bb5ff, #d96bff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 4s ease infinite;
+    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(255,255,255,0.1);
+  }
+
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .subtitle {
+    text-align: center;
+    font-size: 1em;
+    color: #8888cc;
+    margin-bottom: 30px;
+  }
+
+  .mode-selector {
+    display: flex; gap: 15px; justify-content: center; margin-bottom: 30px;
+  }
+
+  .mode-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 15px 40px;
+    border: 3px solid;
+    border-radius: 15px;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .email-input {
+    font-family: 'Space Mono', monospace;
+    width: 100%; max-width: 350px;
+    padding: 10px 15px;
+    background: #0d0d3a;
+    border: 2px solid #4a4a8e;
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 0.9em;
+    outline: none;
+    transition: border-color 0.3s;
+    text-align: center;
+  }
+  .email-input:focus { border-color: #ffd93d; }
+  .email-input::placeholder { color: #5555aa; }
+
+  .qty-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 10px 22px;
+    border: 2px solid #4a4a8e;
+    border-radius: 10px;
+    background: transparent;
+    color: #c0c0ff;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .qty-btn:hover { border-color: #ffd93d; color: #ffd93d; }
+  .qty-btn.selected { border-color: #6bff6b; color: #6bff6b; background: rgba(107,255,107,0.1); }
+
+  .mode-btn.easy {
+    border-color: #6bff6b;
+    color: #6bff6b;
+  }
+
+  .mode-btn.easy:hover {
+    background: #6bff6b;
+    color: #0a0a2e;
+    box-shadow: 0 0 30px rgba(107, 255, 107, 0.5);
+  }
+
+  .mode-btn.hard {
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+  }
+
+  .mode-btn.hard:hover {
+    background: #ff6b6b;
+    color: #0a0a2e;
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #1a1a4e;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6bff6b, #ffd93d, #ff6b6b);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+  }
+
+  .score-display {
+    text-align: center;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1em;
+    color: #ffd93d;
+    margin-bottom: 15px;
+  }
+
+  .question-card {
+    background: linear-gradient(135deg, #1a1a4e, #2a1a5e);
+    border: 2px solid #3a3a8e;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
+  }
+
+  .question-number {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.9em;
+    color: #6bb5ff;
+    margin-bottom: 10px;
+  }
+
+  .question-text {
+    font-size: 1.2em;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #ffffff;
+  }
+
+  .options {
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  .option-btn {
+    font-family: 'Space Mono', monospace;
+    padding: 15px 20px;
+    background: #0d0d3a;
+    border: 2px solid #4a4a8e;
+    border-radius: 12px;
+    color: #c0c0ff;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: #8888ff;
+    background: #1a1a5e;
+    transform: translateX(5px);
+  }
+
+  .option-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .option-btn.selected {
+    border-color: #ffd93d;
+    background: #2a2a3e;
+  }
+
+  .option-btn.correct {
+    border-color: #6bff6b !important;
+    background: rgba(107, 255, 107, 0.15) !important;
+    color: #6bff6b !important;
+  }
+
+  .option-btn.wrong {
+    border-color: #ff6b6b !important;
+    background: rgba(255, 107, 107, 0.15) !important;
+    color: #ff6b6b !important;
+  }
+
+
+
+  .submit-btn {
+    font-family: 'Orbitron', sans-serif;
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #6a6aae, #8a6ace);
+    box-shadow: 0 0 20px rgba(150, 100, 255, 0.4);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+
+  .timer-label {
+    text-align: center;
+    color: #ff6b6b;
+    font-size: 0.9em;
+    margin-top: 8px;
+    font-family: 'Orbitron', sans-serif;
+  }
+
+  .feedback {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .feedback.correct {
+    background: rgba(107, 255, 107, 0.1);
+    border: 2px solid #6bff6b;
+  }
+
+  .feedback.wrong {
+    background: rgba(255, 107, 107, 0.1);
+    border: 2px solid #ff6b6b;
+  }
+
+  .feedback-icon {
+    font-size: 2em;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .feedback-text {
+    font-size: 0.95em;
+    line-height: 1.6;
+    color: #ccccff;
+  }
+
+  .feedback-text strong {
+    color: #ffd93d;
+  }
+
+  .next-btn {
+    font-family: 'Orbitron', sans-serif;
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #2a8a2a, #3aaa3a);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .next-btn:hover {
+    background: linear-gradient(135deg, #3aaa3a, #4aca4a);
+    box-shadow: 0 0 20px rgba(100, 255, 100, 0.3);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .final-screen {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .final-score {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4em;
+    margin: 20px 0;
+  }
+
+  .final-score.great { color: #6bff6b; }
+  .final-score.good { color: #ffd93d; }
+  .final-score.try-again { color: #ff6b6b; }
+
+  .final-msg {
+    font-size: 1.3em;
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+
+  .restart-btn {
+    font-family: 'Orbitron', sans-serif;
+    padding: 15px 50px;
+    background: linear-gradient(135deg, #6b4aff, #9b6bff);
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .restart-btn:hover {
+    box-shadow: 0 0 30px rgba(150, 100, 255, 0.5);
+    transform: scale(1.05);
+  }
+
+  .hidden { display: none; }
+
+  .number-rain {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+  }
+
+  .falling-number {
+    position: absolute;
+    top: -50px;
+    font-family: 'Orbitron', sans-serif;
+    color: rgba(100, 100, 255, 0.08);
+    font-size: 1.5em;
+    animation: fall linear infinite;
+  }
+
+  @keyframes fall {
+    to { transform: translateY(110vh); }
+  }
+
+  .big-number-fact {
+    text-align: center;
+    font-size: 0.8em;
+    color: #5555aa;
+    margin-top: 20px;
+    font-style: italic;
+  }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.5em; }
+    .mode-btn { padding: 12px 25px; font-size: 1em; }
+    .question-text { font-size: 1em; }
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="number-rain" id="numberRain"></div>
+
+<div class="container">
+  <a href="../index.html" style="color:#6bb5ff;text-decoration:none;font-size:0.85em;font-family:'Space Mono',monospace">&larr; QuizX</a>
+  <h1>GRANDES NÚMEROS</h1>
+  <p class="subtitle">Googol, Googolplex e alem do infinito!</p>
+
+  <!-- Start Screen -->
+  <div id="modeScreen">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">RECEBER RESULTADO POR E-MAIL (opcional)</div>
+      <input type="email" id="emailInput" class="email-input" placeholder="seu@email.com">
+    </div>
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">QUANTAS PERGUNTAS?</div>
+      <div class="mode-selector" style="margin-bottom:0">
+        <button class="qty-btn selected" onclick="selectQty(this,10)">10</button>
+        <button class="qty-btn" onclick="selectQty(this,20)">20</button>
+        <button class="qty-btn" onclick="selectQty(this,25)">25</button>
+      </div>
+    </div>
+    <div class="mode-selector">
+      <button class="mode-btn easy" onclick="startQuiz('easy')">INICIAR QUIZ</button>
+    </div>
+    <div class="big-number-fact">
+      Voce sabia? Um googolplex tem mais zeros do que atomos no universo observavel!
+    </div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quizScreen" class="hidden">
+    <div class="score-display" id="scoreDisplay">Acertos: 0 / 0</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- Final -->
+  <div id="finalScreen" class="hidden"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "Quantos zeros tem um googol?",
+    answer: "100",
+    acceptAlt: ["100", "cem"],
+    explanation: "Um <strong>googol</strong> e o numero 1 seguido de 100 zeros. Ou seja: 10<sup>100</sup>. Foi inventado por um menino de 9 anos chamado Milton Sirotta em 1938!",
+    options: ["100", "10", "1.000", "1.000.000"]
+  },
+  {
+    q: "Quantos zeros tem um googolplex?",
+    answer: "10\u00b9\u2070\u2070 (um googol de zeros)",
+    acceptAlt: ["googol", "10^100", "um googol", "10¹⁰⁰", "10 elevado a 100"],
+    explanation: "Um <strong>googolplex</strong> = 10<sup>googol</sup> = 10<sup>10<sup>100</sup></sup>. Ele tem exatamente um <strong>googol de zeros</strong> (10<sup>100</sup> zeros). Impossivel escrever todos, mesmo usando todos os atomos do universo!",
+    options: ["Um googol (10\u00b9\u2070\u2070)", "100", "1.000", "Um trilhao"]
+  },
+  {
+    q: "Quantos zeros tem um googolplex dividido por 10?",
+    answer: "Um googol menos 1",
+    acceptAlt: ["googol - 1", "googol menos 1", "10^100 - 1", "10^100 -1"],
+    explanation: "Dividir por 10 e o mesmo que tirar um zero. Googolplex tem 10<sup>100</sup> zeros, entao googolplex / 10 tem <strong>10<sup>100</sup> - 1 zeros</strong> (um googol menos um).",
+    options: ["Um googol menos 1", "Um googol", "99", "Metade de um googol"]
+  },
+  {
+    q: "Quantos zeros tem googolplex x googolplex? (googolplex ao quadrado)",
+    answer: "2 googols (2 x 10\u00b9\u2070\u2070)",
+    acceptAlt: ["2 googol", "2 googols", "dois googols", "2 x 10^100", "2*10^100"],
+    explanation: "Googolplex x googolplex = 10<sup>10<sup>100</sup></sup> x 10<sup>10<sup>100</sup></sup> = 10<sup>2 x 10<sup>100</sup></sup>. Isso da <strong>2 googols de zeros</strong> (2 x 10<sup>100</sup>). Multiplicar potencias de 10 = somar os expoentes!",
+    options: ["2 googols (2 x 10\u00b9\u2070\u2070)", "Um googol", "Um googol ao quadrado", "200"]
+  },
+  {
+    q: "Se voce tiver um googolplex e dividir por 100, quantos zeros sobram?",
+    answer: "Um googol menos 2",
+    acceptAlt: ["googol - 2", "googol menos 2", "10^100 - 2"],
+    explanation: "Dividir por 100 = dividir por 10 duas vezes = tirar 2 zeros. Entao: <strong>10<sup>100</sup> - 2 zeros</strong>. Ainda e um numero absurdamente gigante!",
+    options: ["Um googol menos 2", "Um googol menos 100", "98", "50"]
+  },
+  {
+    q: "Quantos zeros tem um googolplex dividido por 1.000?",
+    answer: "Um googol menos 3",
+    acceptAlt: ["googol - 3", "googol menos 3", "10^100 - 3"],
+    explanation: "1.000 = 10<sup>3</sup>, entao tiramos 3 zeros: <strong>10<sup>100</sup> - 3 zeros</strong>. O padrao: dividir por 10<sup>n</sup> tira n zeros!",
+    options: ["Um googol menos 3", "97", "Um googol dividido por 3", "333"]
+  },
+  {
+    q: "O que e maior: um googolplex ou um googol de googols? Por que?",
+    answer: "Googolplex!",
+    acceptAlt: ["googolplex", "o googolplex"],
+    explanation: "Um googol de googols = 10<sup>100</sup> x 10<sup>100</sup> = 10<sup>200</sup> (200 zeros). Googolplex = 10<sup>10<sup>100</sup></sup> (um googol de zeros). <strong>10<sup>100</sup> >> 200</strong>, entao googolplex ganha de lavada!",
+    options: ["Googolplex, porque tem 10\u00b9\u2070\u2070 zeros vs 200", "Sao iguais", "Googol de googols, porque tem googol x googol", "Nenhum, sao infinitos"]
+  },
+  {
+    q: "Quantos zeros tem 10 x googolplex?",
+    answer: "Um googol mais 1",
+    acceptAlt: ["googol + 1", "googol mais 1", "10^100 + 1"],
+    explanation: "10 x googolplex = 10 x 10<sup>10<sup>100</sup></sup> = 10<sup>10<sup>100</sup> + 1</sup>. Ganhamos mais um zero: <strong>10<sup>100</sup> + 1 zeros</strong>!",
+    options: ["Um googol mais 1", "Um googol mais 10", "Um googol", "11 googols"]
+  },
+  {
+    q: "Se voce multiplicar googolplex por 10, quantos zeros ele ganha?",
+    answer: "1",
+    acceptAlt: ["1", "um", "apenas 1", "so 1"],
+    explanation: "Multiplicar qualquer numero por 10 = adicionar UM zero no final. Simples assim! De 10<sup>100</sup> zeros para <strong>10<sup>100</sup> + 1 zeros</strong>. So +1!",
+    options: ["1", "10", "100", "Um googol"]
+  },
+  {
+    q: "Quantos zeros tem um googolplex elevado ao quadrado? (reforco da pergunta 4)",
+    answer: "2 googols (2 x 10\u00b9\u2070\u2070)",
+    acceptAlt: ["2 googol", "2 googols", "dois googols", "2 x 10^100"],
+    explanation: "(Googolplex)<sup>2</sup> = (10<sup>10<sup>100</sup></sup>)<sup>2</sup> = 10<sup>2 x 10<sup>100</sup></sup>. Resultado: <strong>2 googols de zeros</strong>. Elevar ao quadrado = dobrar o expoente!",
+    options: ["2 googols (2 x 10\u00b9\u2070\u2070)", "Um googol ao quadrado (10\u00b2\u2070\u2070)", "200", "Um googol"]
+  },
+  {
+    q: "Um googolplex tem mais zeros que atomos no universo?",
+    answer: "Sim, muuuito mais!",
+    acceptAlt: ["sim", "s", "yes", "muuuito mais", "sim muuuito mais"],
+    explanation: "O universo observavel tem cerca de 10<sup>80</sup> atomos. Um googolplex tem 10<sup>100</sup> zeros. <strong>10<sup>100</sup> e 100 quintilhoes de vezes maior que 10<sup>80</sup></strong>. Se cada atomo fosse um zero, voce ainda nao conseguiria escrever um googolplex!",
+    options: ["Sim, muuuito mais!", "Nao, sao parecidos", "Sao iguais", "Nao, atomos sao mais"]
+  },
+  {
+    q: "Quantos zeros tem googolplex / 10\u00b9\u2070 (dividido por 10 bilhoes)?",
+    answer: "Um googol menos 10",
+    acceptAlt: ["googol - 10", "googol menos 10", "10^100 - 10"],
+    explanation: "10<sup>10</sup> = 10 bilhoes. Dividir por 10<sup>10</sup> tira 10 zeros: <strong>10<sup>100</sup> - 10 zeros</strong>. Ainda absurdamente grande!",
+    options: ["Um googol menos 10", "90", "Um googol dividido por 10", "10 bilhoes"]
+  },
+  {
+    q: "Se voce tirar um zero de um googolplex, que numero fica?",
+    answer: "10 elevado a (10\u00b9\u2070\u2070 - 1)",
+    acceptAlt: ["10^(10^100 - 1)", "10^(googol-1)", "10 elevado a googol menos 1"],
+    explanation: "Tirar um zero = dividir por 10. O resultado e <strong>10<sup>(10<sup>100</sup> - 1)</sup></strong>. Ainda tem 99999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999 zeros. Quase um googolplex!",
+    options: ["10 elevado a (googol - 1)", "Um googol", "10 elevado a 99", "Metade de um googolplex"]
+  },
+  {
+    q: "Quantos zeros tem googolplex x googol?",
+    answer: "Um googol mais 100",
+    acceptAlt: ["googol + 100", "googol mais 100", "10^100 + 100"],
+    explanation: "Googolplex x googol = 10<sup>10<sup>100</sup></sup> x 10<sup>100</sup> = 10<sup>(10<sup>100</sup> + 100)</sup>. Isso da <strong>10<sup>100</sup> + 100 zeros</strong>. Somamos os expoentes!",
+    options: ["Um googol mais 100", "Um googol x 100", "Dois googols", "100 googols"]
+  },
+  {
+    q: "Um googolplex dividido por um googol, quantos zeros sobram?",
+    answer: "Um googol menos 100",
+    acceptAlt: ["googol - 100", "googol menos 100", "10^100 - 100"],
+    explanation: "Googolplex / googol = 10<sup>10<sup>100</sup></sup> / 10<sup>100</sup> = 10<sup>(10<sup>100</sup> - 100)</sup>. Sobram <strong>10<sup>100</sup> - 100 zeros</strong>. Subtraimos os expoentes!",
+    options: ["Um googol menos 100", "100", "Um googol", "Zero"]
+  },
+  {
+    q: "Quantos zeros tem um googolplex ao cubo (googolplex\u00b3)?",
+    answer: "3 googols (3 x 10\u00b9\u2070\u2070)",
+    acceptAlt: ["3 googol", "3 googols", "tres googols", "3 x 10^100"],
+    explanation: "(Googolplex)<sup>3</sup> = (10<sup>10<sup>100</sup></sup>)<sup>3</sup> = 10<sup>3 x 10<sup>100</sup></sup>. Resultado: <strong>3 googols de zeros</strong>. Elevar ao cubo = triplicar o expoente!",
+    options: ["3 googols (3 x 10\u00b9\u2070\u2070)", "Um googol ao cubo", "300", "Um googol x 3"]
+  },
+  {
+    q: "Se voce multiplicar dois googolplex, quantos zeros o resultado tem?",
+    answer: "2 googols (2 x 10\u00b9\u2070\u2070)",
+    acceptAlt: ["2 googol", "2 googols", "dois googols", "2 x 10^100"],
+    explanation: "Googolplex x googolplex = 10<sup>10<sup>100</sup></sup> x 10<sup>10<sup>100</sup></sup> = 10<sup>2 x 10<sup>100</sup></sup>. Resultado: <strong>2 googols de zeros</strong>. E a mesma conta do quadrado!",
+    options: ["2 googols (2 x 10\u00b9\u2070\u2070)", "4 googols", "Um googol", "200 zeros"]
+  },
+  {
+    q: "Um googolplex tem quantos zeros A MAIS que um googol?",
+    answer: "Um googol menos 100 (10\u00b9\u2070\u2070 - 100)",
+    acceptAlt: ["googol - 100", "googol menos 100", "10^100 - 100"],
+    explanation: "Googolplex tem 10<sup>100</sup> zeros. Googol tem 100 zeros. A diferenca: <strong>10<sup>100</sup> - 100</strong>. Isso e basicamente... quase um googol a mais! 100 e um graooo de areia perto de 10<sup>100</sup>.",
+    options: ["Um googol menos 100", "Um googol", "100", "900"]
+  },
+  {
+    q: "Quantos zeros tem googolplex / 2? (Dica: nao e exato!)",
+    answer: "Um googol menos 1 (10\u00b9\u2070\u2070 - 1)",
+    acceptAlt: ["googol - 1", "googol menos 1", "10^100 - 1", "um googol menos 1"],
+    explanation: "Googolplex / 2 = 5 x 10<sup>(10<sup>100</sup> - 1)</sup>. Ou seja, e um <strong>5 seguido de um googol menos 1 zeros</strong>. O numero nao termina em zero (termina em 5 seguido de zeros? Nao! E 5 e depois zeros). Na verdade: 5 x 10<sup>grande</sup> = 5 000...000, entao tem <strong>10<sup>100</sup> - 1 zeros</strong> depois do 5!",
+    options: ["Um googol menos 1", "Nenhum", "Metade de um googol", "Um googol"]
+  },
+  {
+    q: "Qual numero e maior: googolplex ou 10^googolplex? Explique!",
+    answer: "10^googolplex, e MUITO maior!",
+    acceptAlt: ["10^googolplex", "10 elevado a googolplex", "o segundo"],
+    explanation: "10<sup>googolplex</sup> = 10<sup>10<sup>10<sup>100</sup></sup></sup>. Ele tem um <strong>googolplex de zeros</strong>! Enquanto googolplex tem 'so' um googol de zeros. E como comparar uma formiga com o universo... vezes um trilhao!",
+    options: ["10^googolplex, tem googolplex de zeros!", "Sao iguais", "Googolplex, ele ja e o maximo", "Nenhum, sao infinitos"]
+  },
+  {
+    q: "Quantos zeros tem um googol de googols? (googol x googol)",
+    answer: "200",
+    acceptAlt: ["200", "duzentos"],
+    explanation: "Googol x googol = 10<sup>100</sup> x 10<sup>100</sup> = 10<sup>200</sup>. Isso da um numero com <strong>200 zeros</strong>. Parece muito? Perto de um googolplex (que tem 10<sup>100</sup> zeros), 200 e NADA!",
+    options: ["200", "Um googol", "10.000", "100 googols"]
+  },
+  {
+    q: "Quantos zeros tem 1 googol elevado a 1 googol?",
+    answer: "100 googols de zeros (= 10\u00b9\u2070\u00b2)",
+    acceptAlt: ["10^102", "100 googols", "cem googols", "100 x 10^100"],
+    explanation: "Googol<sup>googol</sup> = (10<sup>100</sup>)<sup>10<sup>100</sup></sup> = 10<sup>(100 x 10<sup>100</sup>)</sup> = 10<sup>10<sup>102</sup></sup>. Sao <strong>100 googols de zeros</strong>! Isso e <strong>100 vezes mais zeros que um googolplex</strong>. Na notacao: 10<sup>102</sup> zeros.",
+    options: ["100 googols de zeros", "Um googol de zeros", "200 zeros", "Um googolplex de zeros"]
+  },
+  {
+    q: "Quantos zeros tem 1 googolplex elevado a 1 googol?",
+    answer: "Um googol de googols de zeros (= 10\u00b2\u2070\u2070)",
+    acceptAlt: ["10^200", "googol de googols", "um googol de googols"],
+    explanation: "Googolplex<sup>googol</sup> = (10<sup>10<sup>100</sup></sup>)<sup>10<sup>100</sup></sup> = 10<sup>(10<sup>100</sup> x 10<sup>100</sup>)</sup> = 10<sup>10<sup>200</sup></sup>. Sao <strong>um googol de googols de zeros</strong>! Lembra que googol x googol = 10<sup>200</sup>? Pois e, esse e o numero de zeros desse monstro! Na notacao: 10<sup>200</sup> zeros.",
+    options: ["Um googol de googols de zeros", "2 googols de zeros", "Um googolplex de zeros", "200 zeros"]
+  },
+  {
+    q: "Quantos zeros tem 1 googol elevado a 1 googolplex?",
+    answer: "100 googolplex de zeros (= 10 elevado a googol+2)",
+    acceptAlt: ["100 googolplex", "100 x googolplex", "10^(10^100 + 2)", "cem googolplex"],
+    explanation: "Googol<sup>googolplex</sup> = (10<sup>100</sup>)<sup>10<sup>10<sup>100</sup></sup></sup> = 10<sup>(100 x googolplex)</sup>. Sao <strong>100 googolplex de zeros</strong>! Se um googolplex ja e absurdo, imagina 100 deles como quantidade de zeros. Na notacao: 10<sup>(10<sup>100</sup> + 2)</sup> zeros. A mente explode!",
+    options: ["100 googolplex de zeros", "Um googolplex de zeros", "100 googols de zeros", "Um googol de zeros"]
+  },
+  {
+    q: "PERGUNTA FINAL! Quantos zeros tem googolplex elevado a googolplex?",
+    answer: "Googol x googolplex de zeros (= 10 elevado a googol+100)",
+    acceptAlt: ["googolplex x googol", "googol x googolplex", "10^(10^100 + 100)", "googolplex vezes googol"],
+    explanation: "Googolplex<sup>googolplex</sup> = (10<sup>10<sup>100</sup></sup>)<sup>10<sup>10<sup>100</sup></sup></sup> = 10<sup>(googol x googolplex)</sup>. Sao <strong>googol x googolplex de zeros</strong>! Ou seja, voce pega a quantidade de zeros de um googolplex e multiplica por um googol. Na notacao: 10<sup>(100 + 10<sup>100</sup>)</sup> zeros. Esse numero e tao grande que nao existe nada no universo para comparar!",
+    options: ["Googol x googolplex de zeros", "Um googolplex de zeros", "Dois googolplex de zeros", "Um googol de googolplex de zeros"]
+  }
+];
+
+let currentMode = '';
+let currentQ = 0;
+let score = 0;
+let timerInterval = null;
+let inputsReady = false;
+let totalQ = 10;
+let roundQuestions = [];
+let userEmail = '';
+
+function selectQty(btn, n) {
+  totalQ = n;
+  document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+// Stars background
+function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 100; i++) {
+    const star = document.createElement('div');
+    star.className = 'star';
+    star.style.left = Math.random() * 100 + '%';
+    star.style.top = Math.random() * 100 + '%';
+    star.style.width = star.style.height = (Math.random() * 3 + 1) + 'px';
+    star.style.animationDelay = Math.random() * 2 + 's';
+    star.style.animationDuration = (Math.random() * 2 + 1) + 's';
+    container.appendChild(star);
+  }
+}
+
+// Falling numbers
+function createNumberRain() {
+  const container = document.getElementById('numberRain');
+  const nums = ['0','1','0','0','0','0','0','0','0','0','10\u00b9\u2070\u2070','10\u00b2\u2070\u2070','0','0','0'];
+  for (let i = 0; i < 30; i++) {
+    const el = document.createElement('div');
+    el.className = 'falling-number';
+    el.textContent = nums[Math.floor(Math.random() * nums.length)];
+    el.style.left = Math.random() * 100 + '%';
+    el.style.animationDuration = (Math.random() * 15 + 10) + 's';
+    el.style.animationDelay = Math.random() * 20 + 's';
+    el.style.fontSize = (Math.random() * 1.5 + 0.8) + 'em';
+    container.appendChild(el);
+  }
+}
+
+function startQuiz(mode) {
+  currentMode = mode;
+  currentQ = 0;
+  score = 0;
+  userEmail = (document.getElementById('emailInput').value || '').trim();
+  const shuffled = [...questions].sort(() => Math.random() - 0.5);
+  roundQuestions = shuffled.slice(0, Math.min(totalQ, questions.length));
+  document.getElementById('modeScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion() {
+  const q = roundQuestions[currentQ];
+  const area = document.getElementById('questionArea');
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ}`;
+  document.getElementById('progressFill').style.width = (currentQ / roundQuestions.length * 100) + '%';
+
+  const shuffled = [...q.options].sort(() => Math.random() - 0.5);
+  const inputHTML = '<div class="options">' + shuffled.map((opt, i) =>
+    `<button class="option-btn" data-idx="${i}" data-value="${opt}" onclick="selectOption(this)">${opt}</button>`
+  ).join('') + '</div>';
+
+  area.innerHTML = `
+    <div class="question-card">
+      <div class="question-number">Pergunta ${currentQ + 1} de ${roundQuestions.length}</div>
+      <div class="question-text">${q.q}</div>
+      ${inputHTML}
+      <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+      <div class="timer-label" id="timerLabel">Liberando em 3...</div>
+      <div id="feedbackArea"></div>
+    </div>
+  `;
+
+  inputsReady = false;
+  let countdown = 3;
+  const label = document.getElementById('timerLabel');
+  timerInterval = setInterval(() => {
+    countdown--;
+    if (countdown > 0) {
+      label.textContent = `Liberando em ${countdown}...`;
+    } else {
+      clearInterval(timerInterval);
+      label.textContent = '';
+      inputsReady = true;
+      enableInputs();
+    }
+  }, 1000);
+}
+
+function enableInputs() {
+  // options already clickable, inputsReady flag controls behavior
+}
+
+let selectedOption = null;
+
+function selectOption(btn) {
+  if (!inputsReady) return;
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedOption = btn.dataset.value;
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function checkAnswer() {
+  clearInterval(timerInterval);
+  const q = roundQuestions[currentQ];
+  let userAnswer = '';
+  let isCorrect = false;
+
+  userAnswer = selectedOption || '';
+  isCorrect = (userAnswer === q.options[0]);
+
+  document.querySelectorAll('.option-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.dataset.value === q.options[0]) {
+      btn.classList.add('correct');
+    } else if (btn.dataset.value === userAnswer && !isCorrect) {
+      btn.classList.add('wrong');
+    }
+  });
+
+  if (isCorrect) score++;
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ + 1}`;
+  document.getElementById('submitBtn').classList.add('hidden');
+
+  const fb = document.getElementById('feedbackArea');
+  fb.innerHTML = `
+    <div class="feedback ${isCorrect ? 'correct' : 'wrong'}">
+      <div class="feedback-icon">${isCorrect ? '&#10024; ACERTOU! &#10024;' : '&#10060; Errou!'}</div>
+      <div class="feedback-text">
+        <strong>Resposta: ${q.answer}</strong><br><br>
+        ${q.explanation}
+      </div>
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">${currentQ < roundQuestions.length - 1 ? 'PROXIMA PERGUNTA &#10132;' : 'VER RESULTADO FINAL &#127942;'}</button>
+  `;
+
+  selectedOption = null;
+}
+
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ < roundQuestions.length) {
+    showQuestion();
+  } else {
+    showFinal();
+  }
+}
+
+function showFinal() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  const final = document.getElementById('finalScreen');
+  final.classList.remove('hidden');
+
+  const pct = Math.round(score / roundQuestions.length * 100);
+  let cls, emoji, msg;
+  if (pct >= 80) {
+    cls = 'great'; emoji = '&#127775;'; msg = 'Você é um MESTRE dos grandes números! Até o googolplex ficaria com inveja!';
+  } else if (pct >= 50) {
+    cls = 'good'; emoji = '&#128170;'; msg = 'Muito bom! Você já entende mais de números gigantes que a maioria dos adultos!';
+  } else {
+    cls = 'try-again'; emoji = '&#128640;'; msg = 'Continue explorando! Os grandes números são loucos, mas você está no caminho certo!';
+  }
+
+  final.innerHTML = `
+    <div class="final-screen">
+      <h1>RESULTADO FINAL</h1>
+      <div style="font-size:3em">${emoji}</div>
+      <div class="final-score ${cls}">${score}/${roundQuestions.length}</div>
+      <div class="final-msg">${msg}</div>
+      <div style="color:#8888cc;margin-bottom:20px">Acurácia: ${pct}%</div>
+      ${userEmail ? `<div id="emailStatus" style="color:#6bff6b;margin-bottom:15px;font-size:0.85em">Enviando resultado para ${userEmail}...</div>` : ''}
+      <button class="restart-btn" onclick="restart()">JOGAR DE NOVO</button>
+    </div>
+  `;
+
+  if (userEmail) sendResult(pct);
+}
+
+function sendResult(pct) {
+  const subject = encodeURIComponent(`QuizX - Grandes Números: ${score}/${roundQuestions.length} (${pct}%)`);
+  const lines = [`QuizX - Grandes Números`, ``, `Resultado: ${score}/${roundQuestions.length} (${pct}%)`, ``, `Perguntas respondidas:`];
+  roundQuestions.forEach((q, i) => {
+    lines.push(`${i+1}. ${q.q}`);
+    lines.push(`   Resposta: ${q.answer}`);
+  });
+  lines.push(``, `---`, `Enviado por QuizX`);
+  const body = encodeURIComponent(lines.join('\n'));
+  const mailto = `mailto:${userEmail}?subject=${subject}&body=${body}`;
+  window.open(mailto, '_blank');
+  const st = document.getElementById('emailStatus');
+  if (st) st.textContent = `E-mail preparado para ${userEmail}!`;
+}
+
+function restart() {
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('modeScreen').classList.remove('hidden');
+  selectedOption = null;
+}
+
+createStars();
+createNumberRain();
+</script>
+</body>
+</html>

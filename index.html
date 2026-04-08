@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizX</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Space Mono', monospace;
+    background: #0a0a2e;
+    color: #e0e0ff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b, #6bb5ff, #d96bff);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: rainbow 4s ease infinite;
+    margin-bottom: 40px;
+  }
+  @keyframes rainbow {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .quizes {
+    display: flex; flex-wrap: wrap; gap: 25px; justify-content: center;
+    max-width: 900px;
+  }
+  .quiz-card {
+    background: linear-gradient(135deg, #1a1a4e, #2a1a5e);
+    border: 2px solid #3a3a8e;
+    border-radius: 20px;
+    padding: 30px;
+    width: 280px;
+    text-decoration: none;
+    color: #e0e0ff;
+    transition: all 0.3s;
+    cursor: pointer;
+    display: block;
+  }
+  .quiz-card:hover {
+    border-color: #8888ff;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(100,100,255,0.3);
+  }
+  .quiz-icon { font-size: 3em; text-align: center; margin-bottom: 15px; }
+  .quiz-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.1em;
+    text-align: center;
+    margin-bottom: 10px;
+    color: #ffd93d;
+  }
+  .quiz-desc {
+    font-size: 0.85em;
+    text-align: center;
+    color: #8888cc;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+  <h1>QUIZX</h1>
+  <div class="quizes">
+    <a class="quiz-card" href="grandes-numeros/index.html">
+      <div class="quiz-icon">&#x1F4A5;</div>
+      <div class="quiz-title">GRANDES NUMEROS</div>
+      <div class="quiz-desc">Googol, Googolplex e alem do infinito! 25 perguntas sobre os maiores numeros que existem.</div>
+    </a>
+    <a class="quiz-card" href="bandeiras/index.html">
+      <div class="quiz-icon">&#x1F30D;</div>
+      <div class="quiz-title">BANDEIRAS DO MUNDO</div>
+      <div class="quiz-desc">200+ paises! Teste seus conhecimentos sobre bandeiras, moedas e idiomas. 15 perguntas aleatorias por rodada.</div>
+    </a>
+  </div>
+</body>
+</html>
