@@ -295,6 +295,19 @@
       <input type="email" id="emailInput" class="email-input" placeholder="seu@email.com">
     </div>
     <div style="text-align:center;margin-bottom:18px">
+      <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">FILTRAR POR CONTINENTE</div>
+      <div class="modes" style="margin-bottom:0;flex-wrap:wrap">
+        <button class="qty-btn selected" onclick="selectContinent(this,'')">Todos</button>
+        <button class="qty-btn" onclick="selectContinent(this,'África')">África</button>
+        <button class="qty-btn" onclick="selectContinent(this,'América do Sul')">Am. do Sul</button>
+        <button class="qty-btn" onclick="selectContinent(this,'América do Norte')">Am. do Norte</button>
+        <button class="qty-btn" onclick="selectContinent(this,'América Central')">Am. Central</button>
+        <button class="qty-btn" onclick="selectContinent(this,'Ásia')">Ásia</button>
+        <button class="qty-btn" onclick="selectContinent(this,'Europa')">Europa</button>
+        <button class="qty-btn" onclick="selectContinent(this,'Oceania')">Oceania</button>
+      </div>
+    </div>
+    <div id="qtySection" style="text-align:center;margin-bottom:18px">
       <div style="font-family:'Orbitron',sans-serif;font-size:0.8em;color:#6bb5ff;margin-bottom:10px;">QUANTAS PERGUNTAS?</div>
       <div class="modes" style="margin-bottom:0">
         <button class="qty-btn selected" onclick="selectQty(this,10)">10</button>
@@ -560,10 +573,26 @@ let roundCountries = [];
 let selectedAnswer = null;
 let inputsReady = false;
 let timerInterval = null;
+let selectedContinent = '';
+
+function selectContinent(btn, cont) {
+  selectedContinent = cont;
+  document.querySelectorAll('.modes:first-of-type .qty-btn, button[onclick^="selectContinent"]').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const qtySection = document.getElementById('qtySection');
+  if (cont) {
+    qtySection.style.opacity = '0.3';
+    qtySection.style.pointerEvents = 'none';
+    TOTAL_Q = 10;
+  } else {
+    qtySection.style.opacity = '1';
+    qtySection.style.pointerEvents = 'auto';
+  }
+}
 
 function selectQty(btn, n) {
   TOTAL_Q = n;
-  document.querySelectorAll('.qty-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('#qtySection .qty-btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
 }
 
@@ -593,7 +622,8 @@ function startQuiz(m) {
   currentQ = 0;
   score = 0;
   userEmail = (document.getElementById('emailInput').value || '').trim();
-  roundCountries = shuffle(countries).slice(0, TOTAL_Q);
+  const pool = selectedContinent ? countries.filter(c => c.cont === selectedContinent) : countries;
+  roundCountries = shuffle(pool).slice(0, Math.min(TOTAL_Q, pool.length));
   document.getElementById('modeScreen').classList.add('hidden');
   document.getElementById('quizScreen').classList.remove('hidden');
   document.getElementById('finalScreen').classList.add('hidden');
