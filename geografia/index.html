@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizX - Geografia: Brasil e Mundo</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Space Mono', monospace; background: #0a0a2e; color: #e0e0ff; min-height: 100vh; }
+  .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 {
+    font-family: 'Orbitron', sans-serif; text-align: center; font-size: 1.8em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b, #6bb5ff, #d96bff);
+    background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: rainbow 4s ease infinite; margin-bottom: 8px;
+  }
+  @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  .subtitle { text-align: center; color: #8888cc; font-size: 0.9em; margin-bottom: 25px; }
+  .back-link { display: inline-block; color: #6bb5ff; text-decoration: none; font-size: 0.85em; margin-bottom: 15px; }
+  .back-link:hover { color: #99ccff; }
+
+  .label { font-family:'Orbitron',sans-serif; font-size:0.8em; color:#6bb5ff; margin-bottom:10px; text-align:center; }
+  .modes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 22px; }
+  .qty-btn {
+    font-family: 'Orbitron', sans-serif; padding: 10px 20px; border: 2px solid #4a4a8e; border-radius: 10px;
+    background: transparent; color: #c0c0ff; font-size: 0.8em; cursor: pointer; transition: all 0.3s;
+  }
+  .qty-btn:hover { border-color: #ffd93d; color: #ffd93d; }
+  .qty-btn.selected { border-color: #6bff6b; color: #6bff6b; background: rgba(107,255,107,0.1); }
+
+  .start-btn {
+    font-family: 'Orbitron', sans-serif; display:block; width:100%; max-width:360px; margin:10px auto 0; padding: 16px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae); border: none; border-radius: 12px;
+    color: white; font-size: 1em; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+  }
+  .start-btn:hover { background: linear-gradient(135deg, #6a6aae, #8a6ace); box-shadow: 0 0 20px rgba(150,100,255,0.4); }
+
+  .email-input {
+    font-family: 'Space Mono', monospace; width: 100%; max-width: 360px; padding: 10px 15px;
+    background: #0d0d3a; border: 2px solid #4a4a8e; border-radius: 10px; color: #fff; font-size: 0.9em;
+    outline: none; transition: border-color 0.3s; text-align: center;
+  }
+  .email-input:focus { border-color: #ffd93d; }
+  .email-input::placeholder { color: #5555aa; }
+
+  .progress-bar { width: 100%; height: 8px; background: #1a1a4e; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #6bff6b, #ffd93d, #ff6b6b); border-radius: 4px; transition: width 0.5s ease; }
+  .score-display { text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.95em; color: #ffd93d; margin-bottom: 12px; }
+
+  .question-card {
+    background: linear-gradient(135deg, #1a1a4e, #2a1a5e); border: 2px solid #3a3a8e; border-radius: 20px;
+    padding: 25px; box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
+  }
+  .question-number { font-family: 'Orbitron', sans-serif; font-size: 0.85em; color: #6bb5ff; margin-bottom: 8px; }
+  .subject-tag { font-family:'Orbitron',sans-serif; font-size:0.7em; color:#d96bff; text-align:right; margin-bottom:6px; letter-spacing:1px; }
+  .question-text { font-size: 1.1em; line-height: 1.5; margin-bottom: 20px; color: #fff; text-align: center; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    font-family: 'Space Mono', monospace; padding: 14px 18px; background: #0d0d3a; border: 2px solid #4a4a8e;
+    border-radius: 12px; color: #c0c0ff; font-size: 0.95em; cursor: pointer; transition: all 0.3s; text-align: left;
+  }
+  .option-btn:hover { border-color: #8888ff; background: #1a1a5e; transform: translateX(5px); }
+  .option-btn.selected { border-color: #ffd93d; background: #2a2a3e; }
+  .option-btn.correct { border-color: #6bff6b !important; background: rgba(107,255,107,0.15) !important; color: #6bff6b !important; }
+  .option-btn.wrong { border-color: #ff6b6b !important; background: rgba(255,107,107,0.15) !important; color: #ff6b6b !important; }
+
+  .submit-btn {
+    font-family: 'Orbitron', sans-serif; display: block; width: 100%; margin-top: 15px; padding: 14px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae); border: none; border-radius: 12px;
+    color: white; font-size: 1em; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+  }
+  .submit-btn:hover:not(:disabled) { background: linear-gradient(135deg, #6a6aae, #8a6ace); box-shadow: 0 0 20px rgba(150,100,255,0.4); }
+  .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .feedback { margin-top: 18px; padding: 18px; border-radius: 15px; animation: fadeIn 0.5s ease; }
+  .feedback.correct { background: rgba(107,255,107,0.1); border: 2px solid #6bff6b; }
+  .feedback.wrong { background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; }
+  .feedback-icon { font-size: 1.3em; text-align: center; margin-bottom: 8px; }
+  .feedback-title { text-align:center; }
+  .feedback-title strong { color:#fff; font-size:1.2em; }
+  .feedback-title span { color:#6bb5ff; font-size:0.85em; }
+
+  .country-info { margin-top: 12px; background: rgba(10,10,46,0.5); border-radius: 10px; padding: 12px; }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(100,100,200,0.15); font-size: 0.85em; }
+  .info-row:last-of-type { border-bottom: none; }
+  .info-label { color: #8888cc; }
+  .info-value { color: #e0e0ff; text-align: right; flex: 1; margin-left: 10px; }
+  .info-history { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(100,100,200,0.2); font-size: 0.82em; line-height: 1.6; color: #aaaadd; font-style: italic; }
+
+  .feedback-map { margin-top: 12px; border-radius: 10px; overflow: hidden; border: 2px solid #3a3a8e; }
+  .feedback-map iframe { width: 100%; height: 200px; border: none; }
+
+  .next-btn {
+    font-family: 'Orbitron', sans-serif; display: block; width: 100%; margin-top: 12px; padding: 14px;
+    background: linear-gradient(135deg, #2a8a2a, #3aaa3a); border: none; border-radius: 12px;
+    color: white; font-size: 0.95em; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+  }
+  .next-btn:hover { background: linear-gradient(135deg, #3aaa3a, #4aca4a); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .final-screen { text-align: center; padding: 40px 20px; }
+  .final-score { font-family: 'Orbitron', sans-serif; font-size: 3.5em; margin: 20px 0; }
+  .final-score.great { color: #6bff6b; }
+  .final-score.good { color: #ffd93d; }
+  .final-score.try-again { color: #ff6b6b; }
+  .final-msg { font-size: 1.1em; margin-bottom: 25px; line-height: 1.6; }
+  .restart-btn {
+    font-family: 'Orbitron', sans-serif; padding: 14px 30px; background: linear-gradient(135deg, #6b4aff, #9b6bff);
+    border: none; border-radius: 15px; color: white; font-size: 0.9em; cursor: pointer; text-transform: uppercase;
+    letter-spacing: 2px; transition: all 0.3s; margin: 5px;
+  }
+  .restart-btn:hover { box-shadow: 0 0 30px rgba(150,100,255,0.5); transform: scale(1.05); }
+
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.3em; }
+    .qty-btn { padding: 9px 14px; font-size: 0.72em; }
+    .question-card { padding: 16px; }
+    .option-btn { padding: 11px 14px; font-size: 0.88em; }
+    .question-text { font-size: 0.98em; margin-bottom: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="headerArea">
+    <a href="../index.html" class="back-link">&larr; QuizX</a>
+    <h1>GEOGRAFIA</h1>
+    <p class="subtitle">Brasil e Mundo &mdash; oceanos, continentes, fronteiras, estados e capitais</p>
+  </div>
+
+  <!-- Start -->
+  <div id="startScreen">
+    <div style="text-align:center;margin-bottom:18px">
+      <div class="label">RECEBER RESULTADO POR E-MAIL (opcional)</div>
+      <input type="email" id="emailInput" class="email-input" placeholder="seu@email.com">
+    </div>
+
+    <div class="label">ESCOLHA O ASSUNTO</div>
+    <div class="modes">
+      <button class="qty-btn selected" onclick="selectSubject(this,'tudo')">🌐 Tudo</button>
+      <button class="qty-btn" onclick="selectSubject(this,'oceanos')">🌊 Oceanos</button>
+      <button class="qty-btn" onclick="selectSubject(this,'continentes')">🗺️ Continentes</button>
+      <button class="qty-btn" onclick="selectSubject(this,'fronteiras')">🤝 Fronteiras do Brasil</button>
+      <button class="qty-btn" onclick="selectSubject(this,'americasul')">🌎 América do Sul</button>
+      <button class="qty-btn" onclick="selectSubject(this,'ufs')">📍 Estados (UF)</button>
+      <button class="qty-btn" onclick="selectSubject(this,'capitais')">🏛️ Capitais</button>
+    </div>
+
+    <div class="label">QUANTAS PERGUNTAS?</div>
+    <div class="modes">
+      <button class="qty-btn selected" onclick="selectQty(this,10)">10</button>
+      <button class="qty-btn" onclick="selectQty(this,20)">20</button>
+      <button class="qty-btn" onclick="selectQty(this,30)">30</button>
+      <button class="qty-btn" onclick="selectQty(this,50)">50</button>
+    </div>
+
+    <button class="start-btn" onclick="start()">COMEÇAR &#10132;</button>
+    <div id="poolNote" style="text-align:center;color:#8888cc;font-size:0.8em;margin-top:12px"></div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quizScreen" class="hidden">
+    <div class="score-display" id="scoreDisplay">Acertos: 0 / 0</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- Final -->
+  <div id="finalScreen" class="hidden"></div>
+</div>
+
+<script>
+// ======================= DADOS =======================
+const REGIOES = ['Norte','Nordeste','Centro-Oeste','Sudeste','Sul'];
+
+const UF = [
+  {n:'Acre',sigla:'AC',cap:'Rio Branco',reg:'Norte',cur:'Comprado da Bolívia pelo Tratado de Petrópolis (1903). Tem fuso horário próprio (-5h de Brasília +1).'},
+  {n:'Amapá',sigla:'AP',cap:'Macapá',reg:'Norte',cur:'Cortado pela Linha do Equador, que passa dentro do Marco Zero, em Macapá.'},
+  {n:'Amazonas',sigla:'AM',cap:'Manaus',reg:'Norte',cur:'Maior estado do Brasil em área. Manaus tem o Teatro Amazonas e o Encontro das Águas.'},
+  {n:'Pará',sigla:'PA',cap:'Belém',reg:'Norte',cur:'Belém é a porta de entrada da Amazônia, berço do Círio de Nazaré e do açaí.'},
+  {n:'Rondônia',sigla:'RO',cap:'Porto Velho',reg:'Norte',cur:'Nome em homenagem ao Marechal Rondon; nasceu junto à ferrovia Madeira-Mamoré.'},
+  {n:'Roraima',sigla:'RR',cap:'Boa Vista',reg:'Norte',cur:'Estado mais ao norte do Brasil; abriga o Monte Roraima e o extremo norte do país.'},
+  {n:'Tocantins',sigla:'TO',cap:'Palmas',reg:'Norte',cur:'Estado mais novo do Brasil (1988). Palmas é a capital mais jovem do país.'},
+  {n:'Alagoas',sigla:'AL',cap:'Maceió',reg:'Nordeste',cur:'Terra das lagoas e de praias de águas cristalinas como Maragogi, o "Caribe brasileiro".'},
+  {n:'Bahia',sigla:'BA',cap:'Salvador',reg:'Nordeste',cur:'Salvador foi a primeira capital do Brasil (1549-1763). Berço do axé e do acarajé.'},
+  {n:'Ceará',sigla:'CE',cap:'Fortaleza',reg:'Nordeste',cur:'Praias como Jericoacoara e Canoa Quebrada; grande polo de energia eólica.'},
+  {n:'Maranhão',sigla:'MA',cap:'São Luís',reg:'Nordeste',cur:'São Luís é a única capital brasileira fundada por franceses. Abriga os Lençóis Maranhenses.'},
+  {n:'Paraíba',sigla:'PB',cap:'João Pessoa',reg:'Nordeste',cur:'A Ponta do Seixas, em João Pessoa, é o ponto mais oriental das Américas: onde o sol nasce primeiro no Brasil.'},
+  {n:'Pernambuco',sigla:'PE',cap:'Recife',reg:'Nordeste',cur:'Recife, a "Veneza brasileira"; berço do frevo e do maracatu. Inclui Fernando de Noronha.'},
+  {n:'Piauí',sigla:'PI',cap:'Teresina',reg:'Nordeste',cur:'Tem o menor litoral do Brasil (~66 km). Abriga a Serra da Capivara, com arte rupestre milenar.'},
+  {n:'Rio Grande do Norte',sigla:'RN',cap:'Natal',reg:'Nordeste',cur:'Natal e as dunas de Genipabu. Tem um dos pontos do Brasil mais próximos da Europa e da África.'},
+  {n:'Sergipe',sigla:'SE',cap:'Aracaju',reg:'Nordeste',cur:'Menor estado do Brasil em área. Aracaju foi uma das primeiras capitais planejadas do país.'},
+  {n:'Distrito Federal',sigla:'DF',cap:'Brasília',reg:'Centro-Oeste',cur:'Abriga Brasília, capital federal inaugurada em 1960 e Patrimônio da Humanidade pela obra de Niemeyer.'},
+  {n:'Goiás',sigla:'GO',cap:'Goiânia',reg:'Centro-Oeste',cur:'Goiânia é cidade planejada. O estado guarda a histórica Cidade de Goiás e a Chapada dos Veadeiros.'},
+  {n:'Mato Grosso',sigla:'MT',cap:'Cuiabá',reg:'Centro-Oeste',cur:'Cuiabá fica perto do centro geodésico da América do Sul. Portal do Pantanal.'},
+  {n:'Mato Grosso do Sul',sigla:'MS',cap:'Campo Grande',reg:'Centro-Oeste',cur:'Abriga boa parte do Pantanal e Bonito, capital do ecoturismo brasileiro.'},
+  {n:'Espírito Santo',sigla:'ES',cap:'Vitória',reg:'Sudeste',cur:'Vitória é uma capital-ilha. Forte na produção de café, mármore e granito.'},
+  {n:'Minas Gerais',sigla:'MG',cap:'Belo Horizonte',reg:'Sudeste',cur:'Estado com mais municípios do Brasil (853). Berço do barroco mineiro e do pão de queijo.'},
+  {n:'Rio de Janeiro',sigla:'RJ',cap:'Rio de Janeiro',reg:'Sudeste',cur:'Foi capital do Brasil até 1960. Cristo Redentor, Pão de Açúcar e Maracanã.'},
+  {n:'São Paulo',sigla:'SP',cap:'São Paulo',reg:'Sudeste',cur:'Estado mais populoso e rico do Brasil. Sua capital é a maior cidade da América do Sul.'},
+  {n:'Paraná',sigla:'PR',cap:'Curitiba',reg:'Sul',cur:'Curitiba é referência mundial em urbanismo. Divide as Cataratas do Iguaçu com a Argentina.'},
+  {n:'Rio Grande do Sul',sigla:'RS',cap:'Porto Alegre',reg:'Sul',cur:'Estado mais ao sul do Brasil. Terra do chimarrão, do churrasco e da cultura gaúcha.'},
+  {n:'Santa Catarina',sigla:'SC',cap:'Florianópolis',reg:'Sul',cur:'Florianópolis, a "Ilha da Magia", tem 42 praias. Forte colonização alemã e açoriana.'}
+];
+
+const OCEANOS = [
+  {n:'Oceano Pacífico', clue:'É o maior e mais profundo oceano do planeta, cobre cerca de um terço da superfície da Terra e abriga a Fossa das Marianas.', area:'165,2 milhões km²', profMed:'~4.280 m', profMax:'Fossa das Marianas (~10.935 m)', banha:'Américas, Ásia e Oceania', cur:'O nome foi dado por Fernão de Magalhães em 1520, que o achou "pacífico" (calmo) após cruzar o estreito turbulento ao sul.', mapQ:'Pacific Ocean', z:2},
+  {n:'Oceano Atlântico', clue:'Banha toda a costa do Brasil e separa as Américas da Europa e da África. É o segundo maior oceano.', area:'106,5 milhões km²', profMed:'~3.646 m', profMax:'Fossa de Porto Rico (~8.376 m)', banha:'Américas (oeste), Europa e África (leste)', cur:'Cresce alguns centímetros por ano: a Dorsal Mesoatlântica afasta lentamente as Américas da Europa/África.', mapQ:'Atlantic Ocean', z:2},
+  {n:'Oceano Índico', clue:'É o terceiro maior oceano e banha o leste da África, o sul da Ásia e a Austrália.', area:'70,6 milhões km²', profMed:'~3.741 m', profMax:'Fossa de Java/Sonda (~7.290 m)', banha:'África (leste), Ásia (sul) e Oceania', cur:'É o único oceano que recebe o nome de um país: a Índia.', mapQ:'Indian Ocean', z:2},
+  {n:'Oceano Antártico', clue:'Circunda totalmente a Antártida e é o mais recente a ser oficialmente reconhecido (ano 2000). Também chamado de Glacial Antártico ou Austral.', area:'~21,9 milhões km²', profMed:'~3.270 m', profMax:'Fossa Sandwich do Sul (~7.235 m)', banha:'Antártida', cur:'Suas águas frias circulam ao redor de todo o globo pela Corrente Circumpolar Antártica, a mais forte do mundo.', mapQ:'Southern Ocean', z:2},
+  {n:'Oceano Ártico', clue:'É o menor e mais raso oceano, fica ao redor do Polo Norte e é coberto por gelo marinho.', area:'~14,1 milhões km²', profMed:'~1.205 m', profMax:'Molloy Deep (~5.550 m)', banha:'América do Norte, Europa e Ásia (ao redor do Polo Norte)', cur:'Boa parte fica congelada o ano todo, mas o gelo diminui no verão — e vem encolhendo com o aquecimento global.', mapQ:'Arctic Ocean', z:2}
+];
+
+const CONTINENTES = [
+  {n:'Ásia', clue:'É o maior e mais populoso continente do mundo. Abriga China, Índia e o Monte Everest, o ponto mais alto do planeta.', area:'~44,6 milhões km²', pop:'~4,7 bilhões', paises:'~49 países', maior:'China (o maior totalmente asiático)', cur:'Concentra cerca de 60% de toda a população humana.', mapQ:'Asia', z:2},
+  {n:'África', clue:'É o segundo maior continente e o berço da humanidade. Cortado pela Linha do Equador e pelo deserto do Saara.', area:'~30,3 milhões km²', pop:'~1,5 bilhão', paises:'54 países', maior:'Argélia', cur:'Tem 54 países, mais do que qualquer outro continente.', mapQ:'Africa', z:2},
+  {n:'América', clue:'Estende-se do Ártico à Patagônia e se divide em Norte, Central e Sul. É onde fica o Brasil.', area:'~42,5 milhões km²', pop:'~1,04 bilhão', paises:'35 países', maior:'Canadá', cur:'O nome vem do navegador Américo Vespúcio, que percebeu tratar-se de um "novo mundo".', mapQ:'Americas', z:2},
+  {n:'Antártida', clue:'É o continente gelado do Polo Sul, sem população permanente e governado por um tratado internacional.', area:'~14 milhões km²', pop:'sem população permanente', paises:'nenhum país', maior:'—', cur:'Guarda cerca de 70% de toda a água doce do mundo, na forma de gelo.', mapQ:'Antarctica', z:1},
+  {n:'Europa', clue:'Separado da Ásia pelos Montes Urais, é o berço da União Europeia e um dos menores continentes em área.', area:'~10,5 milhões km²', pop:'~745 milhões', paises:'~50 países', maior:'Ucrânia (maior 100% europeu)', cur:'Forma com a Ásia um único bloco de terra chamado "Eurásia".', mapQ:'Europe', z:2},
+  {n:'Oceania', clue:'É o menor continente, formado pela Austrália e por milhares de ilhas espalhadas no Oceano Pacífico.', area:'~8,5 milhões km²', pop:'~45 milhões', paises:'14 países', maior:'Austrália', cur:'Inclui a Austrália, conhecida como o "continente-país".', mapQ:'Oceania', z:2}
+];
+
+// Países que fazem fronteira com o Brasil (todos os da Am. do Sul, menos Chile e Equador)
+const FRONTEIRAS = [
+  {n:'Argentina', cap:'Buenos Aires', ext:'~1.263 km', regBR:'Sul (Rio Grande do Sul)', cur:'A Tríplice Fronteira (Brasil-Argentina-Paraguai) fica em Foz do Iguaçu, junto às Cataratas.', mapQ:'Argentina', z:4},
+  {n:'Uruguai', cap:'Montevidéu', ext:'~1.068 km', regBR:'Sul (Rio Grande do Sul)', cur:'A fronteira tem cidades "gêmeas" como Santana do Livramento (BR) e Rivera (UY), separadas só por uma rua.', mapQ:'Uruguay', z:5},
+  {n:'Paraguai', cap:'Assunção', ext:'~1.371 km', regBR:'Sul e Centro-Oeste (PR e MS)', cur:'A usina de Itaipu é binacional, dividida entre o Brasil e o Paraguai.', mapQ:'Paraguay', z:5},
+  {n:'Bolívia', cap:'Sucre', ext:'~3.423 km', regBR:'Norte e Centro-Oeste (AC, RO, MT, MS)', cur:'Tem a maior fronteira do Brasil com um único país: cerca de 3.400 km. Não possui saída para o mar desde uma guerra com o Chile no século XIX.', mapQ:'Bolivia', z:4},
+  {n:'Peru', cap:'Lima', ext:'~2.995 km', regBR:'Norte (Acre e Amazonas)', cur:'Boa parte da fronteira corta floresta amazônica de difícil acesso.', mapQ:'Peru', z:4},
+  {n:'Colômbia', cap:'Bogotá', ext:'~1.645 km', regBR:'Norte (Amazonas)', cur:'A tríplice fronteira Brasil-Colômbia-Peru fica em Tabatinga/Letícia, no coração da Amazônia.', mapQ:'Colombia', z:4},
+  {n:'Venezuela', cap:'Caracas', ext:'~2.199 km', regBR:'Norte (Roraima e Amazonas)', cur:'A fronteira passa pelo Monte Roraima, marco entre Brasil, Venezuela e Guiana.', mapQ:'Venezuela', z:4},
+  {n:'Guiana', cap:'Georgetown', ext:'~1.308 km', regBR:'Norte (Roraima)', cur:'Antiga Guiana Britânica, é o único país sul-americano onde se fala inglês como idioma oficial.', mapQ:'Guyana', z:5},
+  {n:'Suriname', cap:'Paramaribo', ext:'~593 km', regBR:'Norte (Pará)', cur:'Antiga Guiana Holandesa: o holandês é o idioma oficial. É o menor país da América do Sul.', mapQ:'Suriname', z:5},
+  {n:'Guiana Francesa', cap:'Caiena', ext:'~730 km', regBR:'Norte (Amapá)', cur:'Não é um país: é um território ultramarino da França — logo, o Brasil faz fronteira "com a França" e com a União Europeia. Abriga o Centro Espacial de Kourou.', mapQ:'French Guiana', z:5}
+];
+// Distratores: países que NÃO fazem fronteira com o Brasil
+const NAO_FRONTEIRA = ['Chile','Equador','Panamá','Costa Rica','México','Cuba'];
+
+const AMERICASUL = [
+  {n:'Argentina', cap:'Buenos Aires', m:'Peso argentino', l:'Espanhol', pop:'~46 mi', cur:'Foi um dos países mais ricos do mundo no início do século XX. Terra do tango e de Messi.', mapQ:'Argentina', z:4},
+  {n:'Bolívia', cap:'Sucre', m:'Boliviano', l:'Espanhol, Quíchua e Aimará', pop:'~12 mi', cur:'Tem duas capitais: Sucre (constitucional) e La Paz (sede do governo, a mais alta do mundo).', mapQ:'Bolivia', z:4},
+  {n:'Brasil', cap:'Brasília', m:'Real', l:'Português', pop:'~203 mi', cur:'Maior país da América do Sul em área e população. Único de língua portuguesa no continente.', mapQ:'Brazil', z:3},
+  {n:'Chile', cap:'Santiago', m:'Peso chileno', l:'Espanhol', pop:'~19 mi', cur:'País mais estreito e comprido do mundo. Junto com o Equador, é um dos dois que NÃO fazem fronteira com o Brasil.', mapQ:'Chile', z:3},
+  {n:'Colômbia', cap:'Bogotá', m:'Peso colombiano', l:'Espanhol', pop:'~52 mi', cur:'Único país sul-americano banhado pelos oceanos Pacífico e Atlântico (Caribe).', mapQ:'Colombia', z:4},
+  {n:'Equador', cap:'Quito', m:'Dólar americano', l:'Espanhol', pop:'~18 mi', cur:'Recebe o nome da Linha do Equador, que o corta. Abriga as Ilhas Galápagos.', mapQ:'Ecuador', z:4},
+  {n:'Guiana', cap:'Georgetown', m:'Dólar guianense', l:'Inglês', pop:'~0,8 mi', cur:'Único país do continente de língua inglesa. Vive um boom de petróleo recente.', mapQ:'Guyana', z:5},
+  {n:'Paraguai', cap:'Assunção', m:'Guarani', l:'Espanhol e Guarani', pop:'~6,9 mi', cur:'País bilíngue: o guarani é língua oficial ao lado do espanhol. Não tem saída para o mar.', mapQ:'Paraguay', z:5},
+  {n:'Peru', cap:'Lima', m:'Sol', l:'Espanhol e Quíchua', pop:'~34 mi', cur:'Coração do antigo Império Inca. Abriga Machu Picchu, uma das maravilhas do mundo.', mapQ:'Peru', z:4},
+  {n:'Suriname', cap:'Paramaribo', m:'Dólar surinamês', l:'Holandês', pop:'~0,6 mi', cur:'Menor país da América do Sul em área e população. Idioma oficial: holandês.', mapQ:'Suriname', z:5},
+  {n:'Uruguai', cap:'Montevidéu', m:'Peso uruguaio', l:'Espanhol', pop:'~3,4 mi', cur:'Um dos países mais estáveis e progressistas da região. Bicampeão mundial de futebol.', mapQ:'Uruguay', z:5},
+  {n:'Venezuela', cap:'Caracas', m:'Bolívar', l:'Espanhol', pop:'~28 mi', cur:'Tem as maiores reservas de petróleo do mundo e o Salto Angel, a cachoeira mais alta do planeta.', mapQ:'Venezuela', z:4}
+];
+
+const SUBJECT_LABELS = {
+  oceanos:'OCEANOS', continentes:'CONTINENTES', fronteiras:'FRONTEIRAS DO BRASIL',
+  americasul:'AMÉRICA DO SUL', ufs:'ESTADOS (UF)', capitais:'CAPITAIS'
+};
+
+// ======================= MOTOR =======================
+let TOTAL_Q = 10, subjectKey = 'tudo', userEmail = '', currentQ = 0, score = 0;
+let round = [], selected = null, ready = false;
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pickStrings(pool, n, exclude){ return shuffle(pool.filter(x=>x!==exclude)).slice(0,n); }
+
+function poolFor(key){
+  if(key==='oceanos')     return OCEANOS.map(x=>({...x,_s:'oceanos'}));
+  if(key==='continentes') return CONTINENTES.map(x=>({...x,_s:'continentes'}));
+  if(key==='fronteiras')  return FRONTEIRAS.map(x=>({...x,_s:'fronteiras'}));
+  if(key==='americasul')  return AMERICASUL.map(x=>({...x,_s:'americasul'}));
+  if(key==='ufs')         return UF.map(x=>({...x,_s:'ufs'}));
+  if(key==='capitais')    return UF.map(x=>({...x,_s:'capitais'}));
+  return [];
+}
+function fullPool(){
+  if(subjectKey==='tudo') return ['oceanos','continentes','fronteiras','americasul','ufs','capitais'].flatMap(poolFor);
+  return poolFor(subjectKey);
+}
+
+function selectSubject(btn,key){
+  subjectKey = key;
+  document.querySelectorAll('button[onclick^="selectSubject"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  const total = fullPool().length;
+  document.getElementById('poolNote').textContent = `${total} perguntas disponíveis neste assunto.`;
+}
+function selectQty(btn,n){
+  TOTAL_Q = n;
+  document.querySelectorAll('button[onclick^="selectQty"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function start(){
+  userEmail = (document.getElementById('emailInput').value || '').trim();
+  currentQ = 0; score = 0;
+  const pool = fullPool();
+  round = shuffle(pool).slice(0, Math.min(TOTAL_Q, pool.length));
+  document.getElementById('headerArea').classList.add('hidden');
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  showQuestion();
+}
+
+// Constrói a pergunta: {qtext, correct, options[]}
+function buildQuestion(item){
+  const s = item._s;
+  if(s==='oceanos'){
+    const opts = shuffle([item.n, ...pickStrings(OCEANOS.map(o=>o.n),3,item.n)]);
+    return {qtext:`${item.clue}<br><span style="color:#6bb5ff;font-size:0.85em">Que oceano é este?</span>`, correct:item.n, options:opts};
+  }
+  if(s==='continentes'){
+    const opts = shuffle([item.n, ...pickStrings(CONTINENTES.map(o=>o.n),3,item.n)]);
+    return {qtext:`${item.clue}<br><span style="color:#6bb5ff;font-size:0.85em">Que continente é este?</span>`, correct:item.n, options:opts};
+  }
+  if(s==='fronteiras'){
+    const opts = shuffle([item.n, ...pickStrings(NAO_FRONTEIRA,3,item.n)]);
+    return {qtext:`Qual destes <strong>faz fronteira</strong> com o Brasil?`, correct:item.n, options:opts};
+  }
+  if(s==='americasul'){
+    const opts = shuffle([item.cap, ...pickStrings(AMERICASUL.map(o=>o.cap),3,item.cap)]);
+    return {qtext:`Qual é a capital de <strong>${item.n}</strong>?`, correct:item.cap, options:opts};
+  }
+  if(s==='ufs'){
+    const opts = shuffle([item.reg, ...pickStrings(REGIOES,3,item.reg)]);
+    return {qtext:`Em qual <strong>região</strong> fica <strong>${item.n}</strong> (${item.sigla})?`, correct:item.reg, options:opts};
+  }
+  if(s==='capitais'){
+    const opts = shuffle([item.cap, ...pickStrings(UF.map(o=>o.cap),3,item.cap)]);
+    return {qtext:`Qual é a capital de <strong>${item.n}</strong>?`, correct:item.cap, options:opts};
+  }
+}
+
+function mapEmbed(q,z){
+  return `<div class="feedback-map"><iframe loading="lazy" src="https://maps.google.com/maps?q=${encodeURIComponent(q)}&z=${z||4}&output=embed"></iframe></div>`;
+}
+function row(label,val){ return `<div class="info-row"><span class="info-label">${label}</span><span class="info-value">${val}</span></div>`; }
+
+// Feedback enriquecido por assunto
+function buildFeedback(item){
+  const s = item._s; let title='', rows='', mq='', z=4;
+  if(s==='oceanos'){
+    title = `<strong>${item.n}</strong>`;
+    rows = row('Área',item.area)+row('Profundidade média',item.profMed)+row('Ponto mais profundo',item.profMax)+row('Banha',item.banha);
+    mq=item.mapQ; z=item.z;
+  } else if(s==='continentes'){
+    title = `<strong>${item.n}</strong>`;
+    rows = row('Área',item.area)+row('População',item.pop)+row('Países',item.paises)+row('Maior país',item.maior);
+    mq=item.mapQ; z=item.z;
+  } else if(s==='fronteiras'){
+    title = `<strong>${item.n}</strong> <span>— faz fronteira com o Brasil</span>`;
+    rows = row('Capital',item.cap)+row('Extensão da fronteira',item.ext)+row('Divisa pela região',item.regBR)+row('Continente','América do Sul');
+    mq=item.mapQ; z=item.z;
+  } else if(s==='americasul'){
+    title = `<strong>${item.n}</strong> <span>— América do Sul</span>`;
+    rows = row('Capital',item.cap)+row('Moeda',item.m)+row('Idioma',item.l)+row('População',item.pop);
+    mq=item.mapQ; z=item.z;
+  } else { // ufs / capitais
+    title = `<strong>${item.n}</strong> <span>— ${item.reg}</span>`;
+    rows = row('Sigla',item.sigla)+row('Capital',item.cap)+row('Região',item.reg);
+    mq=`${item.n}, Brasil`; z=5;
+  }
+  return `
+    <div class="feedback-title">${title}</div>
+    <div class="country-info">
+      ${rows}
+      <div class="info-history">${item.cur}</div>
+    </div>
+    ${mapEmbed(mq,z)}`;
+}
+
+function showQuestion(){
+  const item = round[currentQ];
+  const q = buildQuestion(item);
+  item.__q = q;
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ}`;
+  document.getElementById('progressFill').style.width = (currentQ / round.length * 100) + '%';
+  const html = `
+    <div class="question-card">
+      <div class="subject-tag">${SUBJECT_LABELS[item._s]}</div>
+      <div class="question-number">Pergunta ${currentQ+1} de ${round.length}</div>
+      <div class="question-text">${q.qtext}</div>
+      <div class="options">
+        ${q.options.map(o=>`<button class="option-btn" data-value="${o}" onclick="selectOption(this)">${o}</button>`).join('')}
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>RESPONDER</button>
+      <div id="feedbackArea"></div>
+    </div>`;
+  document.getElementById('questionArea').innerHTML = html;
+  selected = null; ready = true;
+  window.scrollTo(0,0);
+}
+
+function selectOption(btn){
+  if(!ready) return;
+  document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selected = btn.dataset.value;
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function checkAnswer(){
+  if(selected===null) return;
+  ready = false;
+  const item = round[currentQ];
+  const correct = item.__q.correct;
+  const isCorrect = selected === correct;
+
+  document.querySelectorAll('.option-btn').forEach(btn=>{
+    btn.style.pointerEvents='none';
+    if(btn.dataset.value===correct) btn.classList.add('correct');
+    else if(btn.dataset.value===selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  if(isCorrect) score++;
+  document.getElementById('scoreDisplay').textContent = `Acertos: ${score} / ${currentQ+1}`;
+  document.getElementById('submitBtn').classList.add('hidden');
+
+  const last = currentQ >= round.length-1;
+  const nextLabel = last ? 'VER RESULTADO &#127942;' : 'PRÓXIMA &#10132;';
+  document.getElementById('feedbackArea').innerHTML = `
+    <button class="next-btn" onclick="nextQuestion()">${nextLabel}</button>
+    <div class="feedback ${isCorrect?'correct':'wrong'}">
+      <div class="feedback-icon">${isCorrect?'&#10024; ACERTOU! &#10024;':'&#10060; Errou!'}</div>
+      ${buildFeedback(item)}
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">${nextLabel}</button>`;
+  selected = null;
+  window.scrollTo(0,0);
+}
+
+function nextQuestion(){
+  currentQ++;
+  window.scrollTo(0,0);
+  if(currentQ < round.length) showQuestion();
+  else showFinal();
+}
+
+function summaryOf(item){
+  const s = item._s;
+  if(s==='oceanos'||s==='continentes') return item.n;
+  if(s==='fronteiras') return `${item.n} faz fronteira com o Brasil (${item.regBR})`;
+  if(s==='americasul') return `${item.n} → ${item.cap}`;
+  if(s==='ufs') return `${item.n} (${item.sigla}) → Região ${item.reg}`;
+  if(s==='capitais') return `${item.n} → ${item.cap}`;
+  return item.n;
+}
+
+function showFinal(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  const final = document.getElementById('finalScreen');
+  final.classList.remove('hidden');
+  const pct = Math.round(score / round.length * 100);
+  let cls, emoji, msg;
+  if(pct>=80){ cls='great'; emoji='&#127775;'; msg='Você é um MESTRE da geografia!'; }
+  else if(pct>=50){ cls='good'; emoji='&#128170;'; msg='Muito bom! Continue treinando e logo domina tudo!'; }
+  else { cls='try-again'; emoji='&#128640;'; msg='O mundo é enorme! Continue jogando para aprender mais!'; }
+  const subjName = subjectKey==='tudo' ? 'Tudo' : SUBJECT_LABELS[subjectKey];
+
+  final.innerHTML = `
+    <div class="final-screen">
+      <h1>RESULTADO</h1>
+      <div style="font-size:3em">${emoji}</div>
+      <div class="final-score ${cls}">${score}/${round.length}</div>
+      <div class="final-msg">${msg}</div>
+      <div style="color:#8888cc;margin-bottom:20px">Assunto: ${subjName} | Acurácia: ${pct}%</div>
+      ${userEmail?`<div id="emailStatus" style="color:#6bff6b;margin-bottom:15px;font-size:0.85em">Preparando e-mail para ${userEmail}...</div>`:''}
+      <button class="restart-btn" onclick="start()">JOGAR DE NOVO</button>
+      <button class="restart-btn" onclick="backToStart()">TROCAR ASSUNTO</button>
+    </div>`;
+  if(userEmail) sendResult(pct, subjName);
+}
+
+function sendResult(pct, subjName){
+  const subject = encodeURIComponent(`QuizX - Geografia: ${score}/${round.length} (${pct}%)`);
+  const lines = [`QuizX - Geografia (Brasil e Mundo)`, ``, `Assunto: ${subjName}`, `Resultado: ${score}/${round.length} (${pct}%)`, ``, `Perguntas da rodada:`];
+  round.forEach((it,i)=>lines.push(`${i+1}. ${summaryOf(it)}`));
+  lines.push(``, `---`, `Enviado por QuizX`);
+  const body = encodeURIComponent(lines.join('\n'));
+  window.open(`mailto:${userEmail}?subject=${subject}&body=${body}`, '_blank');
+  const st = document.getElementById('emailStatus');
+  if(st) st.textContent = `E-mail preparado para ${userEmail}!`;
+}
+
+function backToStart(){
+  document.getElementById('headerArea').classList.remove('hidden');
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+
+// inicializa nota de contagem
+selectSubject(document.querySelector('button[onclick^="selectSubject"]'), 'tudo');
+</script>
+</body>
+</html>
