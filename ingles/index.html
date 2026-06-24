@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QuizX - Inglês 4º ano (Caps. 3 e 4)</title>
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Space Mono', monospace; background: #0a0a2e; color: #e0e0ff; min-height: 100vh; }
+  .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+  h1 {
+    font-family: 'Orbitron', sans-serif; text-align: center; font-size: 1.7em;
+    background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bff6b, #6bb5ff, #d96bff);
+    background-size: 300% 300%; -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    animation: rainbow 4s ease infinite; margin-bottom: 8px;
+  }
+  @keyframes rainbow { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+  .subtitle { text-align: center; color: #8888cc; font-size: 0.9em; margin-bottom: 25px; }
+  .back-link { display: inline-block; color: #6bb5ff; text-decoration: none; font-size: 0.85em; margin-bottom: 15px; }
+  .back-link:hover { color: #99ccff; }
+
+  .label { font-family:'Orbitron',sans-serif; font-size:0.8em; color:#6bb5ff; margin-bottom:10px; text-align:center; }
+  .modes { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 22px; }
+  .qty-btn {
+    font-family: 'Orbitron', sans-serif; padding: 10px 18px; border: 2px solid #4a4a8e; border-radius: 10px;
+    background: transparent; color: #c0c0ff; font-size: 0.78em; cursor: pointer; transition: all 0.3s;
+  }
+  .qty-btn:hover { border-color: #ffd93d; color: #ffd93d; }
+  .qty-btn.selected { border-color: #6bff6b; color: #6bff6b; background: rgba(107,255,107,0.1); }
+
+  .start-btn {
+    font-family: 'Orbitron', sans-serif; display:block; width:100%; max-width:360px; margin:10px auto 0; padding: 16px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae); border: none; border-radius: 12px;
+    color: white; font-size: 1em; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+  }
+  .start-btn:hover { background: linear-gradient(135deg, #6a6aae, #8a6ace); box-shadow: 0 0 20px rgba(150,100,255,0.4); }
+
+  .email-input {
+    font-family: 'Space Mono', monospace; width: 100%; max-width: 360px; padding: 10px 15px;
+    background: #0d0d3a; border: 2px solid #4a4a8e; border-radius: 10px; color: #fff; font-size: 0.9em;
+    outline: none; transition: border-color 0.3s; text-align: center;
+  }
+  .email-input:focus { border-color: #ffd93d; }
+  .email-input::placeholder { color: #5555aa; }
+
+  .progress-bar { width: 100%; height: 8px; background: #1a1a4e; border-radius: 4px; margin-bottom: 15px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #6bff6b, #ffd93d, #ff6b6b); border-radius: 4px; transition: width 0.5s ease; }
+  .score-display { text-align: center; font-family: 'Orbitron', sans-serif; font-size: 0.95em; color: #ffd93d; margin-bottom: 12px; }
+
+  .question-card {
+    background: linear-gradient(135deg, #1a1a4e, #2a1a5e); border: 2px solid #3a3a8e; border-radius: 20px;
+    padding: 25px; box-shadow: 0 0 40px rgba(100, 100, 255, 0.1);
+  }
+  .question-number { font-family: 'Orbitron', sans-serif; font-size: 0.85em; color: #6bb5ff; margin-bottom: 8px; }
+  .subject-tag { font-family:'Orbitron',sans-serif; font-size:0.68em; color:#d96bff; text-align:right; margin-bottom:6px; letter-spacing:1px; }
+  .question-text { font-size: 1.12em; line-height: 1.55; margin-bottom: 20px; color: #fff; text-align: center; }
+
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .option-btn {
+    font-family: 'Space Mono', monospace; padding: 14px 18px; background: #0d0d3a; border: 2px solid #4a4a8e;
+    border-radius: 12px; color: #c0c0ff; font-size: 0.98em; cursor: pointer; transition: all 0.3s; text-align: left;
+  }
+  .option-btn:hover { border-color: #8888ff; background: #1a1a5e; transform: translateX(5px); }
+  .option-btn.selected { border-color: #ffd93d; background: #2a2a3e; }
+  .option-btn.correct { border-color: #6bff6b !important; background: rgba(107,255,107,0.15) !important; color: #6bff6b !important; }
+  .option-btn.wrong { border-color: #ff6b6b !important; background: rgba(255,107,107,0.15) !important; color: #ff6b6b !important; }
+
+  .submit-btn {
+    font-family: 'Orbitron', sans-serif; display: block; width: 100%; margin-top: 15px; padding: 14px;
+    background: linear-gradient(135deg, #4a4a8e, #6a4aae); border: none; border-radius: 12px;
+    color: white; font-size: 1em; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 2px;
+  }
+  .submit-btn:hover:not(:disabled) { background: linear-gradient(135deg, #6a6aae, #8a6ace); box-shadow: 0 0 20px rgba(150,100,255,0.4); }
+  .submit-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .feedback { margin-top: 18px; padding: 18px; border-radius: 15px; animation: fadeIn 0.5s ease; }
+  .feedback.correct { background: rgba(107,255,107,0.1); border: 2px solid #6bff6b; }
+  .feedback.wrong { background: rgba(255,107,107,0.1); border: 2px solid #ff6b6b; }
+  .feedback-icon { font-size: 1.3em; text-align: center; margin-bottom: 10px; }
+  .answer-line { text-align:center; font-size:1.05em; color:#fff; margin-bottom:12px; }
+  .answer-line strong { color:#6bff6b; }
+
+  .info-block { margin-top: 10px; background: rgba(10,10,46,0.5); border-radius: 10px; padding: 12px 14px; font-size: 0.88em; line-height: 1.55; }
+  .info-block .blk-label { color:#ffd93d; font-family:'Orbitron',sans-serif; font-size:0.72em; letter-spacing:1px; display:block; margin-bottom:4px; }
+  .info-trans { color:#cfcff5; }
+  .info-tip { color:#aaccff; margin-top:10px; padding-top:10px; border-top:1px solid rgba(100,100,200,0.2); font-style: italic; }
+
+  .next-btn {
+    font-family: 'Orbitron', sans-serif; display: block; width: 100%; margin-top: 12px; padding: 14px;
+    background: linear-gradient(135deg, #2a8a2a, #3aaa3a); border: none; border-radius: 12px;
+    color: white; font-size: 0.95em; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: all 0.3s;
+  }
+  .next-btn:hover { background: linear-gradient(135deg, #3aaa3a, #4aca4a); }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .final-screen { text-align: center; padding: 40px 20px; }
+  .final-score { font-family: 'Orbitron', sans-serif; font-size: 3.5em; margin: 20px 0; }
+  .final-score.great { color: #6bff6b; }
+  .final-score.good { color: #ffd93d; }
+  .final-score.try-again { color: #ff6b6b; }
+  .final-msg { font-size: 1.1em; margin-bottom: 25px; line-height: 1.6; }
+  .restart-btn {
+    font-family: 'Orbitron', sans-serif; padding: 14px 30px; background: linear-gradient(135deg, #6b4aff, #9b6bff);
+    border: none; border-radius: 15px; color: white; font-size: 0.9em; cursor: pointer; text-transform: uppercase;
+    letter-spacing: 2px; transition: all 0.3s; margin: 5px;
+  }
+  .restart-btn:hover { box-shadow: 0 0 30px rgba(150,100,255,0.5); transform: scale(1.05); }
+
+  .hidden { display: none; }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 1.25em; }
+    .qty-btn { padding: 9px 13px; font-size: 0.7em; }
+    .question-card { padding: 16px; }
+    .option-btn { padding: 11px 14px; font-size: 0.9em; }
+    .question-text { font-size: 1em; margin-bottom: 14px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="headerArea">
+    <a href="../index.html" class="back-link">&larr; QuizX</a>
+    <h1>INGLÊS &mdash; 4º ANO</h1>
+    <p class="subtitle">Capítulos 3 (Music) e 4 (Time) &mdash; vocabulário, gramática e funções</p>
+  </div>
+
+  <!-- Start -->
+  <div id="startScreen">
+    <div style="text-align:center;margin-bottom:18px">
+      <div class="label">RECEBER RESULTADO POR E-MAIL (opcional)</div>
+      <input type="email" id="emailInput" class="email-input" placeholder="seu@email.com">
+    </div>
+
+    <div class="label">ESCOLHA O ASSUNTO</div>
+    <div class="modes">
+      <button class="qty-btn selected" onclick="selectSubject(this,'tudo')">🌐 Tudo</button>
+      <button class="qty-btn" onclick="selectSubject(this,'inst')">🎵 Instrumentos &amp; Música</button>
+      <button class="qty-btn" onclick="selectSubject(this,'emo')">🎭 Emoções &amp; Antônimos</button>
+      <button class="qty-btn" onclick="selectSubject(this,'pastc')">⏪ Past Continuous</button>
+      <button class="qty-btn" onclick="selectSubject(this,'sugg')">💬 Sugestões &amp; Funções</button>
+      <button class="qty-btn" onclick="selectSubject(this,'time')">⏰ Horas &amp; Relógios</button>
+      <button class="qty-btn" onclick="selectSubject(this,'cal')">📅 Calendário &amp; Tempo</button>
+    </div>
+
+    <div class="label">QUANTAS PERGUNTAS?</div>
+    <div class="modes">
+      <button class="qty-btn selected" onclick="selectQty(this,10)">10</button>
+      <button class="qty-btn" onclick="selectQty(this,20)">20</button>
+      <button class="qty-btn" onclick="selectQty(this,30)">30</button>
+      <button class="qty-btn" onclick="selectQty(this,50)">50</button>
+    </div>
+
+    <button class="start-btn" onclick="start()">START &#10132;</button>
+    <div id="poolNote" style="text-align:center;color:#8888cc;font-size:0.8em;margin-top:12px"></div>
+  </div>
+
+  <!-- Quiz -->
+  <div id="quizScreen" class="hidden">
+    <div class="score-display" id="scoreDisplay">Score: 0 / 0</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="questionArea"></div>
+  </div>
+
+  <!-- Final -->
+  <div id="finalScreen" class="hidden"></div>
+</div>
+
+<script>
+// ======================= BANCO DE QUESTÕES =======================
+// Cada questão: s (assunto), q (enunciado), opts (4 opções), a (correta),
+// tr (tradução/explicação em PT), tip (regra/dica em PT). Nível 4º ano (A1/A2).
+const QUESTIONS = [
+  // --- Cap 3: Instrumentos & Música ---
+  { s:'inst', q:"You blow into this brass instrument to make music. Which one is it?",
+    opts:["Trumpet","Drum","Violin","Piano"], a:"Trumpet",
+    tr:"Você sopra neste instrumento de metal para tocar. → <b>Trumpet</b> = trompete.",
+    tip:"🎺 trumpet = você sopra. 🥁 drum (bateria/tambor) = você bate. 🎻 violin = você usa um arco." },
+
+  { s:'inst', q:"Complete the sentence:<br>“The band will ___ a new song at the concert tonight.”",
+    opts:["perform","listen","sleep","draw"], a:"perform",
+    tr:"A banda vai <b>apresentar/tocar</b> uma música nova no show hoje à noite. <b>perform</b> = apresentar(-se).",
+    tip:"perform = tocar/apresentar para um público. Outras palavras do capítulo: rhythm (ritmo), tune (melodia), concert (show)." },
+
+  // --- Cap 3: Emoções & Antônimos ---
+  { s:'emo', q:"What is the OPPOSITE (antonym) of “happy”?",
+    opts:["sad","fast","loud","high"], a:"sad",
+    tr:"O oposto de <b>happy</b> (feliz) é <b>sad</b> (triste).",
+    tip:"Antônimos do capítulo: happy↔sad, high↔low, fast↔slow, loud↔soft, relaxed↔excited." },
+
+  { s:'emo', q:"In a movie, a calm and slow scene usually has ___ music.",
+    opts:["soft","loud","fast","scary"], a:"soft",
+    tr:"Uma cena calma e lenta costuma ter música <b>soft</b> (suave). O oposto seria <b>loud</b> (alta).",
+    tip:"Os filmmakers (cineastas) usam a soundtrack (trilha sonora) para criar emoção: soft↔loud, slow↔fast." },
+
+  // --- Cap 3 + 4: Past Continuous ---
+  { s:'pastc', q:"Yesterday at 7 p.m., Linda ___ the guitar on the stage.",
+    opts:["was playing","is playing","plays","will play"], a:"was playing",
+    tr:"Ontem às 19h, Linda <b>estava tocando</b> violão. Past Continuous = ação que estava acontecendo no passado.",
+    tip:"Past Continuous = was/were + verbo-ING. I/he/she/it → <b>was</b>; you/we/they → <b>were</b>." },
+
+  { s:'pastc', q:"Choose the correct sentence (two actions happening at the same time in the past):",
+    opts:[
+      "While Julia was watching TV, Felipe was playing soccer.",
+      "While Julia watch TV, Felipe play soccer.",
+      "Julia is watching TV while Felipe plays soccer.",
+      "Julia watch TV while Felipe is playing soccer."],
+    a:"While Julia was watching TV, Felipe was playing soccer.",
+    tr:"<b>Enquanto</b> a Julia estava assistindo TV, o Felipe estava jogando futebol. Usamos <b>while</b> + Past Continuous nas duas ações.",
+    tip:"while = enquanto. Duas ações ao mesmo tempo no passado → as duas no Past Continuous (was/were + -ing)." },
+
+  // --- Cap 3: Sugestões & Funções ---
+  { s:'sugg', q:"Your friends are bored. Which sentence is a SUGGESTION to do something together?",
+    opts:["Let's listen to some music!","I listened to music yesterday.","Do you like music?","Music is very loud."],
+    a:"Let's listen to some music!",
+    tr:"Sugestão = propor fazer algo juntos. <b>“Let's...”</b> = <b>“Vamos...”</b>.",
+    tip:"Formas de sugerir: Let's + verbo / Why don't we...? / Who wants to...?" },
+
+  // --- Cap 4: Horas & Relógios ---
+  { s:'time', q:"It is 12:00 in the middle of the day. What do we call this time?",
+    opts:["Midday","Midnight","Minute","Hour"], a:"Midday",
+    tr:"12h no meio do dia chamamos <b>midday</b> (meio-dia). Meia-noite = <b>midnight</b>.",
+    tip:"mid = meio. midday = meio-dia (noon), midnight = meia-noite." },
+
+  { s:'time', q:"Which compound noun names an old clock that tells time using the sun's shadow?",
+    opts:["Sundial","Hourglass","Calendar","Cellphone"], a:"Sundial",
+    tr:"<b>Sundial</b> (sun + dial) = relógio de sol; usa a sombra do sol. <b>Hourglass</b> (hour + glass) = ampulheta.",
+    tip:"Compound noun = duas palavras viram uma: sun + dial = sundial; hour + glass = hourglass." },
+
+  // --- Cap 4: Calendário & Tempo ---
+  { s:'cal', q:"We study English every day. So we study English ___.",
+    opts:["daily","weekly","monthly","yearly"], a:"daily",
+    tr:"Todo dia = <b>daily</b> (diariamente). week→weekly, month→monthly, year→yearly.",
+    tip:"O sufixo <b>-ly</b> transforma o tempo em advérbio: day→daily, week→weekly, month→monthly, year→yearly." }
+];
+
+const SUBJECT_LABELS = {
+  inst:'INSTRUMENTOS & MÚSICA', emo:'EMOÇÕES & ANTÔNIMOS', pastc:'PAST CONTINUOUS',
+  sugg:'SUGESTÕES & FUNÇÕES', time:'HORAS & RELÓGIOS', cal:'CALENDÁRIO & TEMPO'
+};
+
+// ======================= MOTOR =======================
+let TOTAL_Q = 10, subjectKey = 'tudo', userEmail = '', currentQ = 0, score = 0;
+let round = [], selected = null, ready = false;
+
+function shuffle(arr){ const a=[...arr]; for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+function fullPool(){
+  return subjectKey==='tudo' ? QUESTIONS.slice() : QUESTIONS.filter(q=>q.s===subjectKey);
+}
+
+function selectSubject(btn,key){
+  subjectKey = key;
+  document.querySelectorAll('button[onclick^="selectSubject"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('poolNote').textContent = `${fullPool().length} perguntas disponíveis neste assunto.`;
+}
+function selectQty(btn,n){
+  TOTAL_Q = n;
+  document.querySelectorAll('button[onclick^="selectQty"]').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function start(){
+  userEmail = (document.getElementById('emailInput').value || '').trim();
+  currentQ = 0; score = 0;
+  const pool = fullPool();
+  round = shuffle(pool).slice(0, Math.min(TOTAL_Q, pool.length));
+  document.getElementById('headerArea').classList.add('hidden');
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  showQuestion();
+}
+
+function showQuestion(){
+  const item = round[currentQ];
+  item.__opts = shuffle(item.opts);
+  document.getElementById('scoreDisplay').textContent = `Score: ${score} / ${currentQ}`;
+  document.getElementById('progressFill').style.width = (currentQ / round.length * 100) + '%';
+  const html = `
+    <div class="question-card">
+      <div class="subject-tag">${SUBJECT_LABELS[item.s]}</div>
+      <div class="question-number">Question ${currentQ+1} of ${round.length}</div>
+      <div class="question-text">${item.q}</div>
+      <div class="options">
+        ${item.__opts.map(o=>`<button class="option-btn" data-value="${o.replace(/"/g,'&quot;')}" onclick="selectOption(this)">${o}</button>`).join('')}
+      </div>
+      <button class="submit-btn" id="submitBtn" onclick="checkAnswer()" disabled>ANSWER</button>
+      <div id="feedbackArea"></div>
+    </div>`;
+  document.getElementById('questionArea').innerHTML = html;
+  selected = null; ready = true;
+  window.scrollTo(0,0);
+}
+
+function selectOption(btn){
+  if(!ready) return;
+  document.querySelectorAll('.option-btn').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selected = btn.dataset.value;
+  document.getElementById('submitBtn').disabled = false;
+}
+
+function checkAnswer(){
+  if(selected===null) return;
+  ready = false;
+  const item = round[currentQ];
+  const isCorrect = selected === item.a;
+
+  document.querySelectorAll('.option-btn').forEach(btn=>{
+    btn.style.pointerEvents='none';
+    if(btn.dataset.value===item.a) btn.classList.add('correct');
+    else if(btn.dataset.value===selected && !isCorrect) btn.classList.add('wrong');
+  });
+
+  if(isCorrect) score++;
+  document.getElementById('scoreDisplay').textContent = `Score: ${score} / ${currentQ+1}`;
+  document.getElementById('submitBtn').classList.add('hidden');
+
+  const last = currentQ >= round.length-1;
+  const nextLabel = last ? 'SEE RESULT &#127942;' : 'NEXT &#10132;';
+  document.getElementById('feedbackArea').innerHTML = `
+    <button class="next-btn" onclick="nextQuestion()">${nextLabel}</button>
+    <div class="feedback ${isCorrect?'correct':'wrong'}">
+      <div class="feedback-icon">${isCorrect?'&#10024; CORRECT! &#10024;':'&#10060; Not quite!'}</div>
+      <div class="answer-line">Resposta certa: <strong>${item.a}</strong></div>
+      <div class="info-block">
+        <span class="blk-label">TRADUÇÃO / EXPLICAÇÃO</span>
+        <span class="info-trans">${item.tr}</span>
+        <div class="info-tip"><b>Dica:</b> ${item.tip}</div>
+      </div>
+    </div>
+    <button class="next-btn" onclick="nextQuestion()">${nextLabel}</button>`;
+  selected = null;
+  window.scrollTo(0,0);
+}
+
+function nextQuestion(){
+  currentQ++;
+  window.scrollTo(0,0);
+  if(currentQ < round.length) showQuestion();
+  else showFinal();
+}
+
+function showFinal(){
+  document.getElementById('quizScreen').classList.add('hidden');
+  const final = document.getElementById('finalScreen');
+  final.classList.remove('hidden');
+  const pct = Math.round(score / round.length * 100);
+  let cls, emoji, msg;
+  if(pct>=80){ cls='great'; emoji='&#127775;'; msg='Excellent! You are an English star!'; }
+  else if(pct>=50){ cls='good'; emoji='&#128170;'; msg='Good job! Keep practicing and you will master it!'; }
+  else { cls='try-again'; emoji='&#128218;'; msg='Keep studying — try again, you can do it!'; }
+  const subjName = subjectKey==='tudo' ? 'Tudo' : SUBJECT_LABELS[subjectKey];
+
+  final.innerHTML = `
+    <div class="final-screen">
+      <h1>RESULT</h1>
+      <div style="font-size:3em">${emoji}</div>
+      <div class="final-score ${cls}">${score}/${round.length}</div>
+      <div class="final-msg">${msg}</div>
+      <div style="color:#8888cc;margin-bottom:20px">Assunto: ${subjName} | Acerto: ${pct}%</div>
+      ${userEmail?`<div id="emailStatus" style="color:#6bff6b;margin-bottom:15px;font-size:0.85em">Preparando e-mail para ${userEmail}...</div>`:''}
+      <button class="restart-btn" onclick="start()">PLAY AGAIN</button>
+      <button class="restart-btn" onclick="backToStart()">CHANGE TOPIC</button>
+    </div>`;
+  if(userEmail) sendResult(pct, subjName);
+}
+
+function sendResult(pct, subjName){
+  const subject = encodeURIComponent(`QuizX - Inglês: ${score}/${round.length} (${pct}%)`);
+  const lines = [`QuizX - Inglês 4º ano (Caps. 3 e 4)`, ``, `Assunto: ${subjName}`, `Resultado: ${score}/${round.length} (${pct}%)`, ``, `Perguntas da rodada:`];
+  round.forEach((it,i)=>lines.push(`${i+1}. ${it.q.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()}  ->  ${it.a}`));
+  lines.push(``, `---`, `Enviado por QuizX`);
+  const body = encodeURIComponent(lines.join('\n'));
+  window.open(`mailto:${userEmail}?subject=${subject}&body=${body}`, '_blank');
+  const st = document.getElementById('emailStatus');
+  if(st) st.textContent = `E-mail preparado para ${userEmail}!`;
+}
+
+function backToStart(){
+  document.getElementById('headerArea').classList.remove('hidden');
+  document.getElementById('finalScreen').classList.add('hidden');
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('startScreen').classList.remove('hidden');
+}
+
+selectSubject(document.querySelector('button[onclick^="selectSubject"]'), 'tudo');
+</script>
+</body>
+</html>
