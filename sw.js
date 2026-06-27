@@ -1,5 +1,5 @@
 /* QuizX Service Worker — app estático, offline-first */
-const CACHE = 'quizx-v1';
+const CACHE = 'quizx-v2';
 const SHELL = [
   './',
   './index.html',
@@ -11,7 +11,8 @@ const SHELL = [
   './bandeiras/index.html',
   './grandes-numeros/index.html',
   './geografia/index.html',
-  './ingles/index.html'
+  './ingles/index.html',
+  './matematica/index.html'
 ];
 
 self.addEventListener('install', (e) => {
